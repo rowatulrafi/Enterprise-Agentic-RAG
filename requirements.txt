@@ -1,0 +1,15 @@
+langchain
+langchain-groq
+langchain-community
+langchain-chroma
+langchain-huggingface
+langchain-classic
+langchain-text-splitters
+sentence-transformers
+rank_bm25
+chromadb
+pydantic
+langgraph
+pdf2image
+pytesseract
+python-dotenv
