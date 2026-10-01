@@ -1,0 +1,144 @@
+[
+  {
+    "id": "econ_001",
+    "question": "What were Bangladesh's gross foreign exchange reserves at the end of December 2024?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [6, 23],
+    "category": "financial_fact"
+  },
+  {
+    "id": "econ_002",
+    "question": "What were Bangladesh's BPM6-compliant foreign exchange reserves at the end of December 2024?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [6, 23],
+    "category": "financial_fact"
+  },
+  {
+    "id": "econ_003",
+    "question": "How much remittance did Bangladesh receive in December 2025 and how much higher was it than December 2024?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [5, 20],
+    "category": "financial_comparison"
+  },
+  {
+    "id": "econ_004",
+    "question": "How did Bangladesh's exports perform during July to December of FY26 compared with FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [5, 18],
+    "category": "financial_comparison"
+  },
+  {
+    "id": "econ_005",
+    "question": "What was the total value of Bangladesh's imports during July to November of FY26?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [5, 19],
+    "category": "financial_fact"
+  },
+  {
+    "id": "econ_006",
+    "question": "How much did net foreign direct investment increase during July to November of FY26?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [6, 21, 22],
+    "category": "financial_comparison"
+  },
+  {
+    "id": "econ_007",
+    "question": "What happened to Bangladesh's overall balance of payments during July to November of FY26?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [6, 21, 22],
+    "category": "financial_fact"
+  },
+
+  {
+    "id": "rlc_001",
+    "question": "What are the three damping conditions of a series RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [3, 19],
+    "category": "technical_concept"
+  },
+  {
+    "id": "rlc_002",
+    "question": "What is the damping rate alpha for a series RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [2, 3, 19],
+    "category": "technical_formula"
+  },
+  {
+    "id": "rlc_003",
+    "question": "What is the natural or resonant frequency of a series RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [2, 3, 19],
+    "category": "technical_formula"
+  },
+  {
+    "id": "rlc_004",
+    "question": "What happens to a series RLC circuit when resistance R approaches zero?",
+    "expected_source": "RLC.json",
+    "expected_pages": [5],
+    "category": "technical_concept"
+  },
+  {
+    "id": "rlc_005",
+    "question": "What is the phase relationship between capacitor voltage, inductor voltage, and current in the lossless LC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [6],
+    "category": "technical_relationship"
+  },
+  {
+    "id": "rlc_006",
+    "question": "What is the damping rate alpha for a parallel RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [11, 19],
+    "category": "technical_formula"
+  },
+  {
+    "id": "rlc_007",
+    "question": "What are the initial conditions of the parallel RLC circuit when the source current was zero before t equals zero?",
+    "expected_source": "RLC.json",
+    "expected_pages": [9],
+    "category": "technical_fact"
+  },
+
+  {
+    "id": "nature_001",
+    "question": "How does the handbook define nature connection?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [5],
+    "category": "conceptual_definition"
+  },
+  {
+    "id": "nature_002",
+    "question": "What is psychological nature connection and what outcomes is it linked to?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [6],
+    "category": "conceptual_relationship"
+  },
+  {
+    "id": "nature_003",
+    "question": "Why does the handbook say nature connection is about moments, not minutes?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [7, 8],
+    "category": "conceptual_explanation"
+  },
+  {
+    "id": "nature_004",
+    "question": "What are the five pathways to nature connection?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [10, 11],
+    "category": "conceptual_list"
+  },
+  {
+    "id": "nature_005",
+    "question": "How are the senses and beauty pathways to nature connection activated?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [12],
+    "category": "conceptual_explanation"
+  },
+  {
+    "id": "nature_006",
+    "question": "What do the emotion, compassion, and meaning pathways involve?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [13],
+    "category": "conceptual_explanation"
+  }
+]
