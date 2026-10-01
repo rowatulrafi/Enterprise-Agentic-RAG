@@ -16,7 +16,10 @@ from src.config import (
 from src.state import DocumentValidation
 
 # --- INIT VALIDATOR ---
-structured_validator = llm.with_structured_output(DocumentValidation)
+structured_validator = llm.with_structured_output(
+    DocumentValidation,
+    method="json_schema"
+)
 validation_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are an automated Data Quality Assurance agent evaluating OCR text from a PDF. "
                "If the text is readable and coherent, score it high. "

@@ -1,7 +1,7 @@
 import os
 import torch
 from dotenv import load_dotenv
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
@@ -16,10 +16,35 @@ REVIEW_DIR = os.path.join(DATA_DIR, "human_review_queue")
 CHROMA_DIR = os.path.join(BASE_DIR, "chroma_db")
 
 # --- HARDWARE OPTIMIZATION ---
-device = "mps" if torch.backends.mps.is_available() else "cpu"
+if torch.cuda.is_available():
+    device = "cuda"
+elif torch.backends.mps.is_available():
+    device = "mps"
+else:
+    device = "cpu"
 
 # --- MODELS ---
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+LLM_BASE_URL = os.getenv(
+    "LLM_BASE_URL",
+    "http://127.0.0.1:1234/v1"
+)
+
+LLM_MODEL = os.getenv(
+    "LLM_MODEL",
+    "qwen/qwen3-8b"
+)
+
+LLM_API_KEY = os.getenv(
+    "LLM_API_KEY",
+    "lm-studio"
+)
+
+llm = ChatOpenAI(
+    model=LLM_MODEL,
+    base_url=LLM_BASE_URL,
+    api_key=LLM_API_KEY,
+    temperature=0,
+)
 
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",

@@ -42,7 +42,10 @@ else:
 # 2. INITIALIZE LLM CHAINS
 # ==========================================
 # Grader (Agentic Document Relevance)
-structured_grader = llm.with_structured_output(GradeDocuments)
+structured_grader = llm.with_structured_output(
+    GradeDocuments,
+    method="json_schema"
+)
 grade_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a strict grader. If the document provides enough context to answer the user's question, grade it 'yes'. Otherwise, 'no'."),
     ("human", "Retrieved document: \n\n {document} \n\n User question: {question}")
@@ -50,7 +53,10 @@ grade_prompt = ChatPromptTemplate.from_messages([
 retrieval_grader = grade_prompt | structured_grader
 
 # Rewriter (Agentic Query Optimization)
-structured_rewriter = llm.with_structured_output(RewrittenQuery)
+structured_rewriter = llm.with_structured_output(
+    RewrittenQuery,
+    method="json_schema"
+)
 rewrite_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are an expert search query generator. Transform the user's question into a highly optimized search string for a vector database. "
                "Extract core entities, convert spelled-out Greek letters to symbols (e.g. alpha to α, omega to ω), and drop conversational filler. "
@@ -69,7 +75,10 @@ gen_prompt = ChatPromptTemplate.from_messages([
 rag_chain = gen_prompt | llm | StrOutputParser()
 
 # Verifier (Anti-Hallucination Gate)
-structured_verifier = llm.with_structured_output(CitationVerification)
+structured_verifier = llm.with_structured_output(
+    CitationVerification,
+    method="json_schema"
+)
 verify_prompt = ChatPromptTemplate.from_messages([
     ("system", "You are a strict fact-checker. Verify that EVERY claim in the answer is explicitly stated in the context. If it hallucinates or uses outside knowledge, fail it."),
     ("human", "Context: {context} \n\n Answer to Verify: {generation}")

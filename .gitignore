@@ -4,3 +4,4 @@ data/human_review_queue/*.txt
 .env
 __pycache__/
 *.pyc
+.venv/

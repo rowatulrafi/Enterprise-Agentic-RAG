@@ -1,5 +1,4 @@
 langchain
-langchain-groq
 langchain-community
 langchain-chroma
 langchain-huggingface
@@ -13,3 +12,4 @@ langgraph
 pdf2image
 pytesseract
 python-dotenv
+langchain-openai
