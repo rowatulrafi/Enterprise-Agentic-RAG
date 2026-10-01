@@ -67,10 +67,29 @@ question_rewriter = rewrite_prompt | structured_rewriter
 
 # Generator (Drafting the Answer)
 gen_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are an expert assistant. Use the provided context to answer. "
-               "If a claim in the user's question is contradicted or not present in the context, explicitly state that it is false or missing, but answer the rest of the question if possible. "
-               "If the context lacks the answer entirely, say 'I don't know'. {feedback}"),
-    ("human", "Question: {question} \n\n Context: {context}")
+    (
+        "system",
+        """
+You are a grounded retrieval assistant.
+
+Answer ONLY using the provided context.
+
+GROUNDING RULES:
+1. Every factual claim must be explicitly supported by the context.
+2. Preserve exact entity, year, date, quantity, comparison, and qualifier relationships.
+3. Never transfer a statement about one year, entity, or metric to another.
+4. Never infer causation unless the context explicitly states the causal relationship.
+5. Do not combine separate facts in a way that changes their meaning.
+6. If information is missing, explicitly say that the context does not provide it.
+7. If the context cannot answer the question, say "I don't know".
+
+{feedback}
+"""
+    ),
+    (
+        "human",
+        "Question: {question}\n\nContext:\n{context}"
+    )
 ])
 rag_chain = gen_prompt | llm | StrOutputParser()
 
@@ -80,8 +99,56 @@ structured_verifier = llm.with_structured_output(
     method="json_schema"
 )
 verify_prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a strict fact-checker. Verify that EVERY claim in the answer is explicitly stated in the context. If it hallucinates or uses outside knowledge, fail it."),
-    ("human", "Context: {context} \n\n Answer to Verify: {generation}")
+    (
+        "system",
+        """
+You are a strict claim-level grounding verifier.
+
+Break the generated answer into individual factual claims and verify
+each one against the provided context.
+
+A claim is SUPPORTED only when the context explicitly entails the
+complete claim.
+
+Pay special attention to:
+
+- years and dates
+- numbers and units
+- entities
+- comparisons
+- increases/decreases
+- superlatives such as "highest" or "three-year high"
+- causal statements such as "because of" or "driven by"
+- relationships between separate facts
+
+CRITICAL RULE:
+Never transfer a description, comparison, cause, number, or qualifier
+from one year/entity to another.
+
+Example:
+If the context says:
+"2025 reserves reached a three-year high"
+and
+"2024 reserves were $26 billion"
+
+then the claim:
+"2024 reserves represented a three-year high"
+
+MUST be marked unsupported.
+
+Set is_supported=true ONLY if every factual claim is supported.
+"""
+    ),
+    (
+        "human",
+        """
+Context:
+{context}
+
+Answer to verify:
+{generation}
+"""
+    )
 ])
 verifier_chain = verify_prompt | structured_verifier
 
@@ -123,8 +190,16 @@ def verify_node(state):
     context = "\n\n".join(state["documents"])
     result = verifier_chain.invoke({"context": context, "generation": state["generation"]})
     
-    print(f"Result: {'✅ SUPPORTED' if result.is_supported else '❌ HALLUCINATION'}")
-    print(f"Reasoning: {result.reasoning}")
+    print(
+    f"Result: {'✅ SUPPORTED' if result.is_supported else '❌ UNSUPPORTED'}"
+)
+
+    for claim in result.claims:
+        status = "✅" if claim.is_supported else "❌"
+        print(f"{status} Claim: {claim.claim}")
+        print(f"   Evidence: {claim.evidence}")
+
+    print(f"Overall reasoning: {result.reasoning}")
     
     if result.is_supported:
         return {"verification_feedback": None}

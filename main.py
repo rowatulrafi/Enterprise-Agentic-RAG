@@ -2,8 +2,11 @@ from src.graph import app
 
 def main():
     print("\n" + "="*60)
-    print("🚀 THE ULTIMATE RAG ARCHITECTURE INITIALIZED")
-    print("Features: Multi-Modal Ingestion | Hybrid Search | Agentic Loops")
+    print("LOCAL ENTERPRISE AGENTIC RAG")
+    print("="*60 + "\n")
+    print("LLM       : Qwen3 8B via LM Studio" + "\n")
+    print("Retrieval : Dense + BM25 + Cross-Encoder Reranking" + "\n")
+    print("Safety    : Query Rewrite + Grounding Verification" + "\n")
     print("="*60 + "\n")
 
     while True:

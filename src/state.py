@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
 
+
 # ==========================================
 # 1. DATA INGESTION & VALIDATION SCHEMAS
 # ==========================================
@@ -36,3 +37,35 @@ class CitationVerification(BaseModel):
     """Evaluates if the generated answer is strictly supported by context."""
     is_supported: bool = Field(description="True if claims are supported, False if hallucinations exist.")
     reasoning: str = Field(description="Explanation of unsupported claims, or confirmation of support.")
+
+class ClaimCheck(BaseModel):
+    """Verification result for one factual claim."""
+    
+    claim: str = Field(
+        description="The factual claim extracted from the generated answer."
+    )
+    
+    is_supported: bool = Field(
+        description="True only if the exact claim is explicitly supported by the context."
+    )
+    
+    evidence: str = Field(
+        description="The exact supporting evidence from context, or an explanation if unsupported."
+    )
+
+
+class CitationVerification(BaseModel):
+    """Claim-level grounding verification."""
+    
+    is_supported: bool = Field(
+        description="True only if every factual claim in the answer is supported."
+    )
+    
+    claims: List[ClaimCheck] = Field(
+        description="Verification result for each factual claim."
+    )
+    
+    reasoning: str = Field(
+        description="Overall explanation of the verification decision."
+    )
+    
