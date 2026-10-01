@@ -57,7 +57,18 @@ class ClaimCheck(BaseModel):
     evidence: str = Field(
         description="The exact supporting evidence from context, or an explanation if unsupported."
     )
+    source_ids: List[int] = Field(
+        default_factory=list,
+        description="Sources that directly support the complete claim."
+    )
 
+    error_type: Optional[str] = Field(
+        default=None,
+        description=(
+            "If unsupported: number, date, entity, methodology, "
+            "qualifier, causality, scope, citation, or other."
+        )
+    )
 
 class CitationVerification(BaseModel):
     """Claim-level grounding verification."""

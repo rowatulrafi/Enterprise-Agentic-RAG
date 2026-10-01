@@ -147,6 +147,16 @@ GROUNDING RULES:
 8. Cite factual claims using the source labels provided in the context.
 9. Use the format [SOURCE 1], [SOURCE 2], etc.
 10. Never cite a source that does not support the associated statement.
+13. Preserve qualifiers exactly as they appear in the source.
+14. Never attach a methodology, definition, date, unit, status,
+    or qualifier to a number unless the source explicitly associates
+    that qualifier with that number.
+15. Distinguish general rules from document-specific examples.
+    Example parameter values must never be presented as universal rules.
+16. When a source gives multiple versions of the same metric
+    (for example gross reserves vs BPM6-compliant reserves),
+    keep the metric names and values strictly paired.
+
 
 {feedback}
 """
@@ -200,6 +210,39 @@ then the claim:
 "2024 reserves represented a three-year high"
 
 MUST be marked unsupported.
+
+QUALIFIER BINDING:
+
+A claim is unsupported if the main number is correct but any
+qualifier attached to it is incorrect.
+
+Verify independently:
+- metric definition
+- methodology
+- date/year
+- unit
+- entity
+- comparison
+- cause
+- scope
+
+Example:
+
+Context:
+Gross reserves in 2024 = $26.21B.
+BPM6 reserves in 2024 = $21.39B.
+
+Claim:
+"BPM6 reserves were $26.21B in 2024."
+
+This MUST be marked unsupported.
+
+GENERAL RULE VS EXAMPLE:
+
+If the source gives an example using specific parameter values,
+those values must remain explicitly scoped to that example.
+
+Do not treat example-specific values as universal conditions.
 
 Set is_supported=true ONLY if every factual claim is supported.
 """
