@@ -6,10 +6,37 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_community.retrievers import BM25Retriever
 from langchain_classic.retrievers import EnsembleRetriever, ContextualCompressionRetriever
 from langchain_classic.retrievers.document_compressors import CrossEncoderReranker
+from langchain_core.documents import Document
 
 from src.config import llm, embeddings, cross_encoder, CHROMA_DIR, DATA_DIR
 from src.state import GradeDocuments, RewrittenQuery, CitationVerification
 
+# ==========================================
+# 0. Helper for formatting context
+# ==========================================
+def format_context(documents):
+
+    formatted_sections = []
+
+    for index, doc in enumerate(
+        documents,
+        start=1
+    ):
+
+        formatted_sections.append(
+            f"""
+[SOURCE {index}]
+Document: {doc["source"]}
+Page: {doc["page"]}
+Extraction: {doc["extraction_method"]}
+
+{doc["content"]}
+""".strip()
+        )
+
+    return "\n\n".join(
+        formatted_sections
+    )
 # ==========================================
 # 1. INITIALIZE HYBRID RETRIEVAL
 # ==========================================
@@ -24,19 +51,54 @@ semantic_retriever = chroma_store.as_retriever(search_kwargs={"k": 3})
 # Load Keyword Database (BM25)
 bm25_data_path = os.path.join(DATA_DIR, "bm25_corpus.json")
 if os.path.exists(bm25_data_path):
-    with open(bm25_data_path, "r") as f:
-        text_data = json.load(f)
-    bm25_retriever = BM25Retriever.from_texts(text_data)
-    bm25_retriever.k = 3
-    
-    # Combine and Rerank
-    ensemble_retriever = EnsembleRetriever(retrievers=[bm25_retriever, semantic_retriever], weights=[0.5, 0.5])
-    compressor = CrossEncoderReranker(model=cross_encoder, top_n=3)
-    hybrid_retriever = ContextualCompressionRetriever(base_compressor=compressor, base_retriever=ensemble_retriever)
-else:
-    print("⚠️ BM25 Corpus not found. Falling back to pure Semantic Search until ingestion is run.")
-    hybrid_retriever = semantic_retriever
 
+    with open(
+        bm25_data_path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+        bm25_data = json.load(f)
+
+    bm25_documents = [
+        Document(
+            page_content=item["content"],
+            metadata=item["metadata"]
+        )
+        for item in bm25_data
+    ]
+
+    bm25_retriever = BM25Retriever.from_documents(
+        bm25_documents
+    )
+
+    bm25_retriever.k = 3
+
+    ensemble_retriever = EnsembleRetriever(
+        retrievers=[
+            bm25_retriever,
+            semantic_retriever
+        ],
+        weights=[0.5, 0.5]
+    )
+
+    compressor = CrossEncoderReranker(
+        model=cross_encoder,
+        top_n=3
+    )
+
+    hybrid_retriever = ContextualCompressionRetriever(
+        base_compressor=compressor,
+        base_retriever=ensemble_retriever
+    )
+
+else:
+
+    print(
+        "⚠️ BM25 corpus not found. "
+        "Falling back to semantic retrieval."
+    )
+
+    hybrid_retriever = semantic_retriever
 
 # ==========================================
 # 2. INITIALIZE LLM CHAINS
@@ -82,6 +144,9 @@ GROUNDING RULES:
 5. Do not combine separate facts in a way that changes their meaning.
 6. If information is missing, explicitly say that the context does not provide it.
 7. If the context cannot answer the question, say "I don't know".
+8. Cite factual claims using the source labels provided in the context.
+9. Use the format [SOURCE 1], [SOURCE 2], etc.
+10. Never cite a source that does not support the associated statement.
 
 {feedback}
 """
@@ -156,9 +221,51 @@ verifier_chain = verify_prompt | structured_verifier
 # 3. DEFINE GRAPH NODES
 # ==========================================
 def retrieve_node(state):
-    print("--- 📂 NODE: HYBRID RETRIEVAL & RERANKING ---")
-    docs = hybrid_retriever.invoke(state["question"])
-    return {"documents": [doc.page_content for doc in docs], "question": state["question"]}
+
+    print(
+        "--- 📂 NODE: HYBRID RETRIEVAL & RERANKING ---"
+    )
+
+    docs = hybrid_retriever.invoke(
+        state["question"]
+    )
+
+    retrieved_documents = []
+
+    for doc in docs:
+
+        retrieved_documents.append({
+            "content": doc.page_content,
+            "source": doc.metadata.get(
+                "source",
+                "unknown"
+            ),
+            "page": doc.metadata.get(
+                "page",
+                -1
+            ),
+            "extraction_method":
+                doc.metadata.get(
+                    "extraction_method",
+                    "unknown"
+                ),
+        })
+    
+    for i, doc in enumerate(
+        retrieved_documents,
+        start=1
+    ):
+        print(
+            f"   [{i}] "
+            f"{doc['source']} "
+            f"| page {doc['page']} "
+            f"| {doc['extraction_method']}"
+        )
+
+    return {
+        "documents": retrieved_documents,
+        "question": state["question"]
+    }
 
 def rewrite_node(state):
     print("--- 🔄 NODE: REWRITING QUERY ---")
@@ -171,7 +278,7 @@ def rewrite_node(state):
 
 def generate_node(state):
     print("--- 🤖 NODE: GENERATING ANSWER ---")
-    context = "\n\n".join(state["documents"])
+    context = format_context(state["documents"])
     
     feedback_msg = ""
     if state.get("verification_feedback"):
@@ -187,7 +294,7 @@ def verify_node(state):
         print("✅ Safe fallback detected. Skipping verification.")
         return {"verification_feedback": None}
 
-    context = "\n\n".join(state["documents"])
+    context = format_context(state["documents"])
     result = verifier_chain.invoke({"context": context, "generation": state["generation"]})
     
     print(
@@ -220,8 +327,8 @@ def decide_to_generate(state):
         print("🛑 Max retries reached. Forcing generation.")
         return "generate"
 
-    for doc_text in state["documents"]:
-        grade = retrieval_grader.invoke({"question": state["question"], "document": doc_text})
+    for doc in state["documents"]:
+        grade = retrieval_grader.invoke({"question": state["question"], "document": doc["content"]})
         if grade.binary_score.lower() == "yes":
             print("✅ Relevant documents found -> Proceed to Generate")
             return "generate"

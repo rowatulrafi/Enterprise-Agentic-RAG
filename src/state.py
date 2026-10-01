@@ -6,6 +6,12 @@ from pydantic import BaseModel, Field
 # ==========================================
 # 1. DATA INGESTION & VALIDATION SCHEMAS
 # ==========================================
+class RetrievedDocument(TypedDict):
+    content: str
+    source: str
+    page: int
+    extraction_method: str
+
 class DocumentValidation(BaseModel):
     """Evaluates extracted OCR text for coherence and structure."""
     confidence_score: int = Field(description="Score from 0 to 100 indicating readability.")
@@ -17,11 +23,10 @@ class DocumentValidation(BaseModel):
 # ==========================================
 class MasterRAGState(TypedDict):
     question: str
-    documents: List[str]               # Retrieved context
-    generation: str                    # The drafted answer
-    verification_feedback: Optional[str] # Feedback if hallucination is detected
-    retries: int                       # Infinite loop safety counter
-
+    documents: List[RetrievedDocument]
+    generation: str
+    verification_feedback: Optional[str]
+    retries: int
 # ==========================================
 # 3. STRUCTURED LLM OUTPUTS FOR GRAPH
 # ==========================================
@@ -68,4 +73,5 @@ class CitationVerification(BaseModel):
     reasoning: str = Field(
         description="Overall explanation of the verification decision."
     )
-    
+
+
