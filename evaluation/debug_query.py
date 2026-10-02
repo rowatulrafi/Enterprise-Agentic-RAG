@@ -1,3 +1,7 @@
+import json
+import sys
+from pathlib import Path
+
 from src.retrieval import (
     dense_retriever,
     bm25_retriever,
@@ -5,10 +9,41 @@ from src.retrieval import (
     cross_encoder,
 )
 
+DATASET_PATH = (
+    Path(__file__).resolve().parent
+    / "dataset.json"
+)
 
-QUESTION = (
-    "What happens to a series RLC circuit "
-    "when resistance R approaches zero?"
+with open(
+    DATASET_PATH,
+    "r",
+    encoding="utf-8",
+) as file:
+    dataset = json.load(file)
+
+
+question_id = (
+    sys.argv[1]
+    if len(sys.argv) > 1
+    else "rlc_008"
+)
+
+
+item = next(
+    x
+    for x in dataset
+    if x["id"] == question_id
+)
+
+
+QUESTION = item["question"]
+
+print(f"\nQuestion ID : {question_id}")
+print(f"Question    : {QUESTION}")
+print(
+    f"Expected    : "
+    f"{item['expected_source']} "
+    f"{item['expected_pages']}"
 )
 
 
