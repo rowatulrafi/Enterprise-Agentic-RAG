@@ -31,7 +31,7 @@ chroma_store = Chroma(
 )
 
 dense_retriever = chroma_store.as_retriever(
-    search_kwargs={"k": 10}
+    search_kwargs={"k": 5}
 )
 
 
@@ -71,8 +71,7 @@ bm25_retriever = BM25Retriever.from_documents(
     bm25_documents
 )
 
-bm25_retriever.k = 10
-
+bm25_retriever.k = 5
 
 # ============================================================
 # HYBRID RETRIEVER

@@ -1,0 +1,5 @@
+retriever,queries,hit_at_1,hit_at_3,hit_at_5,mrr,avg_latency_ms
+dense,50,0.54,0.9,0.96,0.723,15.37
+bm25,50,0.58,0.8,0.84,0.69,0.88
+hybrid,50,0.6,0.9,0.96,0.7465,14.88
+hybrid_rerank,50,0.68,0.94,0.94,0.7967,223.72

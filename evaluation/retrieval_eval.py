@@ -32,6 +32,17 @@ with open(
 # HELPERS
 # ============================================================
 
+def first_relevant_rank(docs, item):
+
+    for rank, doc in enumerate(
+        docs,
+        start=1,
+    ):
+        if is_relevant(doc, item):
+            return rank
+
+    return None
+
 def normalize_source(source: str) -> str:
     """
     Normalize filenames for robust comparison.
@@ -164,6 +175,17 @@ def evaluate():
                 item,
                 3,
             )
+            
+            hit_5 = hit_at_k(
+                docs,
+                item,
+                5,
+            )
+
+            first_rank = first_relevant_rank(
+                docs,
+                item,
+            )
 
             rr = reciprocal_rank(
                 docs,
@@ -207,6 +229,12 @@ def evaluate():
                         "unknown",
                     ),
 
+                "difficulty":
+                    item.get(
+                        "difficulty",
+                        "unknown",
+                    ),
+
                 "question":
                     question,
 
@@ -230,6 +258,12 @@ def evaluate():
 
                 "hit_at_3":
                     hit_3,
+                
+                "hit_at_5":
+                    hit_5,
+
+                "first_relevant_rank":
+                    first_rank,
 
                 "reciprocal_rank":
                     rr,
@@ -250,12 +284,26 @@ def evaluate():
                 else "❌"
             )
 
+            rank_display = (
+                first_rank
+                if first_rank is not None
+                else "-"
+            )
+
+            difficulty = item.get(
+                "difficulty",
+                "unknown",
+            )
+
             print(
                 f"{status} "
                 f"[{index:02d}/{len(DATASET)}] "
                 f"{item['id']} "
+                f"[{difficulty}] "
                 f"| H@1={hit_1} "
                 f"| H@3={hit_3} "
+                f"| H@5={hit_5} "
+                f"| First={rank_display} "
                 f"| RR={rr:.3f} "
                 f"| {latency_ms:.1f}ms"
             )
@@ -329,6 +377,11 @@ def build_summary(results):
             for row in rows
         ) / n
 
+        hit_5 = sum(
+            row["hit_at_5"]
+            for row in rows
+        ) / n       
+
         mrr = sum(
             row["reciprocal_rank"]
             for row in rows
@@ -351,6 +404,9 @@ def build_summary(results):
 
             "hit_at_3":
                 round(hit_3, 4),
+            
+            "hit_at_5":
+                round(hit_5, 4),
 
             "mrr":
                 round(mrr, 4),
@@ -360,6 +416,7 @@ def build_summary(results):
                     avg_latency,
                     2,
                 ),
+
         })
 
     with open(
