@@ -2,7 +2,7 @@ from langgraph.graph import END, StateGraph
 from src.state import MasterRAGState
 from src.nodes import (
     retrieve_node, rewrite_node, generate_node, verify_node,
-    decide_to_generate, decide_verification
+    decide_to_generate, decide_after_generation,
 )
 
 # 1. Initialize the State Machine
@@ -31,17 +31,19 @@ workflow.add_conditional_edges(
 workflow.add_edge("rewrite", "retrieve")
 
 # After generation, always verify
-workflow.add_edge("generate", "verify")
+workflow.add_conditional_edges(
+    "generate",
+    decide_after_generation,
+    {
+        "rewrite": "rewrite",
+        "verify": "verify",
+    },
+)
 
 # After verification, decide if we can end or need to re-generate
-workflow.add_conditional_edges(
+workflow.add_edge(
     "verify",
-    decide_verification,
-    {
-        "end": END,
-        "generate": "generate",
-        "rewrite": "rewrite",
-    }
+    END
 )
 
 # 4. Compile the application

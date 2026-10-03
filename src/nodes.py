@@ -1,6 +1,7 @@
 import os
 import json
 
+from src.telemetry import measure_stage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
@@ -169,6 +170,10 @@ GROUNDING RULES:
 even as an example, clarification, parenthetical, common formula,
 or outside-knowledge note.
 
+GENERIC RULES:
+- Answer only what is necessary to answer the question.
+- Do not add unrelated caveats, alternative metrics, or extra facts unless they are necessary for disambiguation.
+
 GROUNDING RULES:
 
 1. QUALIFIER BINDING
@@ -219,115 +224,40 @@ verify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         """
-You are a strict claim-level grounding verifier.
+You are a strict grounding verifier.
 
-Break the generated answer into individual factual claims and verify
-each one against the provided context.
+Check whether EVERY factual claim in the answer is explicitly
+supported by the retrieved context.
 
-A claim is SUPPORTED only when the context explicitly entails the
-complete claim.
+Mark the answer UNSUPPORTED if any claim:
 
-Pay special attention to:
+- uses the wrong number, date, unit, entity, or qualifier;
+- attaches a value to the wrong methodology or metric;
+- presents an example-specific value as a general rule;
+- makes a causal or comparative claim not stated in context;
+- changes the meaning of a mathematical equation;
+- changes an exponent, root, sign, subscript, operator, or equality;
+- cites a source that does not support the claim;
+- introduces outside knowledge, including in examples or parentheses.
 
-- years and dates
-- numbers and units
-- entities
-- comparisons
-- increases/decreases
-- superlatives such as "highest" or "three-year high"
-- causal statements such as "because of" or "driven by"
-- relationships between separate facts
+If the answer says the context lacks information but then supplies
+that missing information anyway, mark it unsupported.
 
-For every claim verify:
-- entity binding
-- year/date binding
-- number/value binding
-- methodology/qualifier binding
-- general rule versus example
-- causal relationship
-- scope
-- citation support
+Return:
+- is_supported
+- unsupported_claims: ONLY unsupported claims
+- reasoning: one short sentence
 
-Adjacent numbers are NOT interchangeable.
-
-A claim fails if its number is correct but attached to the
-wrong qualifier, methodology, year or entity.
-
-A claim fails if example-specific values are presented as a
-general rule.
-
-A claim fails if causal language is stronger than the source.
-
-For mathematical claims, verify every exponent, root, sign, subscript, operator, and equality relation. A mathematically different expression MUST be marked unsupported.
-
-MISSING-EVIDENCE CONSISTENCY:
-
-Any factual content introduced after phrases such as
-"for example", "e.g.", "typically", "generally", "commonly",
-or "such as" must also be explicitly supported by the context.
-
-If an answer says the context lacks some information but then
-supplies that missing information from model knowledge, the
-answer MUST be marked unsupported.
-
-CRITICAL RULE:
-Never transfer a description, comparison, cause, number, or qualifier
-from one year/entity to another.
-
-Example:
-If the context says:
-"2025 reserves reached a three-year high"
-and
-"2024 reserves were $26 billion"
-
-then the claim:
-"2024 reserves represented a three-year high"
-
-MUST be marked unsupported.
-
-QUALIFIER BINDING:
-
-A claim is unsupported if the main number is correct but any
-qualifier attached to it is incorrect.
-
-Verify independently:
-- metric definition
-- methodology
-- date/year
-- unit
-- entity
-- comparison
-- cause
-- scope
-
-Example:
-
-Context:
-Gross reserves in 2024 = $26.21B.
-BPM6 reserves in 2024 = $21.39B.
-
-Claim:
-"BPM6 reserves were $26.21B in 2024."
-
-This MUST be marked unsupported.
-
-GENERAL RULE VS EXAMPLE:
-
-If the source gives an example using specific parameter values,
-those values must remain explicitly scoped to that example.
-
-Do not treat example-specific values as universal conditions.
-
-Set is_supported=true ONLY if every factual claim is supported.
+If all claims are supported, unsupported_claims must be empty.
 """
     ),
     (
         "human",
         """
-Context:
+Retrieved context:
 {context}
 
-Answer to verify:
+Answer:
 {generation}
 """
     )
@@ -351,10 +281,10 @@ def retrieve_node(state):
     print(
         f"Search query: {search_query}"
     )
-
-    docs = hybrid_rerank_retriever.invoke(
-        search_query
-    )
+    with measure_stage("retrieval_ms"):
+        docs = hybrid_rerank_retriever.invoke(
+            search_query
+        )
 
     retrieved_documents = []
 
@@ -405,12 +335,13 @@ def rewrite_node(state):
         state.get("rewrite_count", 0)
     )
     # Always rewrite from the ORIGINAL user question.
-    result = question_rewriter.invoke(
-        {
-            "question":
-                state["question"]
-        }
-    )
+    with measure_stage("rewrite_ms"):
+        result = question_rewriter.invoke(
+            {
+                "question":
+                    state["question"]
+            }
+        )
 
     if isinstance(
         result,
@@ -475,51 +406,86 @@ def generate_node(state):
     - do not algebraically rearrange an equation unless necessary.
     """
         
-    generation = rag_chain.invoke({"context": context, "question": state["question"], "feedback": feedback_msg})
+    with measure_stage("generation_ms"):
+        generation = rag_chain.invoke(
+            {
+                "context": context,
+                "question": state["question"],
+                "feedback": feedback_msg,
+            }
+        )
     return {"generation": generation}
 
 def verify_node(state):
-    print("--- ⚖️ NODE: CITATION VERIFICATION ---")
-    if "I don't know" in state["generation"]:
-        print("✅ Safe fallback detected. Skipping verification.")
+
+    print("--- ⚖️ NODE: GROUNDING VERIFICATION ---")
+
+    generation = state["generation"]
+
+    # Do not waste another LLM call verifying an abstention.
+    if generation_lacks_context(generation):
+
+        print(
+            "✅ Insufficient-context answer detected. "
+            "Returning clean fallback."
+        )
+
+        return {
+            "generation": (
+                "I'm sorry, the retrieved context does not contain "
+                "enough verified information to safely answer "
+                "this question."
+            ),
+            "verification_feedback": None,
+        }
+
+    context = format_context(
+        state["documents"]
+    )
+
+    with measure_stage("verification_ms"):
+
+        result = verifier_chain.invoke(
+            {
+                "context": context,
+                "generation": generation,
+            }
+        )
+
+    print(
+        f"Result: "
+        f"{'✅ SUPPORTED' if result.is_supported else '❌ UNSUPPORTED'}"
+    )
+
+    if result.is_supported:
+
         return {
             "verification_feedback": None,
         }
 
-    context = format_context(state["documents"])
-    result = verifier_chain.invoke({"context": context, "generation": state["generation"]})
-    
     print(
-    f"Result: {'✅ SUPPORTED' if result.is_supported else '❌ UNSUPPORTED'}"
-)
+        "Unsupported claims:",
+        result.unsupported_claims,
+    )
 
-    for claim in result.claims:
-        status = "✅" if claim.is_supported else "❌"
-        print(f"{status} Claim: {claim.claim}")
-        print(f"   Evidence: {claim.evidence}")
+    print(
+        "Reason:",
+        result.reasoning,
+    )
 
-    print(f"Overall reasoning: {result.reasoning}")
-    
-    if result.is_supported:
-        return {"verification_feedback": None}
-    else:
-        # THE SAFETY WIPE: If we fail verification at the max retry limit, wipe the answer!
-        if state.get("verification_retries", 0) >= 1:
-            print("🛑 Safety Valve: Wiping unsupported draft.")
-            safe_fallback = (
-                "I'm sorry, the retrieved context does not contain "
-                "enough verified information to safely answer this question."
-            )
-            return {
-                "generation": safe_fallback,
-                "verification_feedback": None,
-            }
+    print(
+        "🛑 Returning safe fallback."
+    )
 
-        return {
-            "verification_feedback": result.reasoning,
-            "verification_retries":
-                state.get("verification_retries", 0) + 1,
-        }
+    return {
+        "generation": (
+            "I'm sorry, the retrieved context does not contain "
+            "enough verified information to safely answer "
+            "this question."
+        ),
+        "verification_feedback": None,
+    }
+
 # ==========================================
 # 4. DEFINE ROUTING LOGIC
 # ==========================================
@@ -552,15 +518,13 @@ def decide_to_generate(state):
         )
     )
 
-    grade = retrieval_grader.invoke(
-        {
-            "question":
-                state["question"],
-
-            "document":
-                context,
-        }
-    )
+    with measure_stage("grading_ms"):
+        grade = retrieval_grader.invoke(
+            {
+                "question": state["question"],
+                "document": context,
+            }
+        )
 
     score = (
         grade.binary_score
@@ -596,6 +560,7 @@ def generation_lacks_context(
         "context does not contain enough",
         "not enough information to answer",
         "insufficient information",
+        "retrieved context does not provide enough",
     ]
 
     return any(
@@ -603,53 +568,26 @@ def generation_lacks_context(
         for marker in markers
     )
 
-def decide_verification(state):
+def decide_after_generation(state):
 
     generation = state.get(
         "generation",
         "",
     )
-    print(
-        "rewrite_count =",
-        state.get("rewrite_count", 0)
-    )
-    # The relevance grader can make a false-positive.
-    # Give retrieval one second chance.
-    if generation_lacks_context(
-        generation
-    ):
 
-        if (
-            state.get(
-                "rewrite_count",
-                0,
-            )
-            < MAX_REWRITES
-        ):
+    if generation_lacks_context(generation):
+
+        if state.get("rewrite_count", 0) < MAX_REWRITES:
             print(
-                "🔄 Generator found insufficient "
-                "context -> Rewrite retrieval query"
+                "🔄 Generator detected insufficient context "
+                "-> rewrite retrieval query"
             )
-
             return "rewrite"
 
         print(
-            "🛑 Retrieval rewrite already exhausted."
+            "🛑 Retrieval rewrite exhausted "
+            "-> verify/fallback"
         )
+        return "verify"
 
-        return "end"
-
-    if (
-        state.get(
-            "verification_feedback"
-        )
-        is None
-    ):
-        return "end"
-
-    print(
-        "🔄 Re-routing to generator "
-        "for grounded correction"
-    )
-
-    return "generate"
+    return "verify"

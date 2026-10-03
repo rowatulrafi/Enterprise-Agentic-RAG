@@ -4,6 +4,10 @@ import time
 from pathlib import Path
 
 from src.graph import app
+from src.telemetry import (
+    reset_latency_trace,
+    get_latency_trace,
+)
 
 
 # ============================================================
@@ -25,12 +29,26 @@ RESULTS_DIR.mkdir(
 # ============================================================
 
 SELECTED_IDS = [
+    "econ_001",
+    "econ_003",
+    "econ_008",
+    "econ_009",
+    "econ_015",
+    "rlc_001",
+    "rlc_004",
     "rlc_011",
+    "rlc_012",
+    "rlc_016",
+    "nature_001",
+    "nature_007",
+    "nature_008",
+    "nature_011",
+    "nature_014",
 ]
 
 OUTPUT_PATH = (
     RESULTS_DIR
-    / f"end_to_end_{len(SELECTED_IDS)}q_results.csv"
+    / f"end_to_end_dev{len(SELECTED_IDS)}_results.csv"
 )
 
 
@@ -54,6 +72,7 @@ dataset_by_id = {
     for item in full_dataset
 }
 
+from src.config import llm
 
 dataset = [
     dataset_by_id[item_id]
@@ -97,6 +116,8 @@ def has_source_citation(answer):
 # ============================================================
 
 def run_query(item):
+
+    reset_latency_trace()
 
     initial_state = {
         "question":
@@ -198,6 +219,8 @@ def run_query(item):
 
                 generation_count += 1
 
+                generation_history = []
+
                 generation = (
                     node_update.get(
                         "generation",
@@ -213,7 +236,10 @@ def run_query(item):
                         generation
                     )
 
-                if generation:
+                if generation: 
+
+                    generation_history.append(generation)
+
                     final_answer = (
                         generation
                     )
@@ -243,15 +269,56 @@ def run_query(item):
                     )
                 )
 
+                if (
+                    verified_generation
+                    and is_safe_fallback(verified_generation)
+                ):
+                    verifier_rejections += 1
+                
                 if verified_generation:
                     final_answer = (
                         verified_generation
                     )
+    
+    timings = get_latency_trace()
 
     latency_ms = (
         time.perf_counter()
         - start
     ) * 1000
+
+    retrieval_ms = timings.get(
+        "retrieval_ms", 0.0
+    )
+
+    grading_ms = timings.get(
+        "grading_ms", 0.0
+    )
+
+    rewrite_ms = timings.get(
+        "rewrite_ms", 0.0
+    )
+
+    generation_ms = timings.get(
+        "generation_ms", 0.0
+    )
+
+    verification_ms = timings.get(
+        "verification_ms", 0.0
+    )
+
+    accounted_stage_ms = (
+        retrieval_ms
+        + grading_ms
+        + rewrite_ms
+        + generation_ms
+        + verification_ms
+    )
+
+    framework_overhead_ms = max(
+        0.0,
+        latency_ms - accounted_stage_ms,
+    )
 
     # In case the graph's final state owns the answer.
     if final_state.get(
@@ -338,8 +405,20 @@ def run_query(item):
         "final_answer":
             final_answer,
 
-        "end_to_end_ms":
-            latency_ms,
+        "retrieval_ms": retrieval_ms,
+        "grading_ms": grading_ms,
+        "rewrite_ms": rewrite_ms,
+        "generation_ms": generation_ms,
+        "verification_ms": verification_ms,
+        "accounted_stage_ms": accounted_stage_ms,
+        "framework_overhead_ms": framework_overhead_ms,
+        "end_to_end_ms": latency_ms,
+
+        "generation_history":
+            " ||| GENERATION SPLIT ||| ".join(
+                generation_history
+            ),
+
     }
 
 
@@ -370,6 +449,19 @@ print(
 print(
     "=" * 78
 )
+
+print("\n🔥 Warming up local LLM...")
+
+try:
+    llm.invoke(
+        "Reply with exactly: OK"
+    )
+    print("✅ Warm-up complete.")
+
+except Exception as exc:
+    print(
+        f"⚠️ Warm-up failed: {exc}"
+    )
 
 
 for index, item in enumerate(

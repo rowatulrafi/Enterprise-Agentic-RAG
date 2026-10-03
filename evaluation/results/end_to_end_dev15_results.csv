@@ -1,0 +1,153 @@
+question_id,difficulty,category,question,expected_source,expected_pages,retrieve_calls,rewrite_calls,rewritten_queries,generation_calls,verification_calls,verifier_rejections,draft_changed,safe_fallback,has_source_citation,first_draft,final_answer,retrieval_ms,grading_ms,rewrite_ms,generation_ms,verification_ms,accounted_stage_ms,framework_overhead_ms,end_to_end_ms,generation_history
+econ_001,easy,financial_fact,What were Bangladesh's gross foreign exchange reserves at the end of December 2024?,October-December-25-3.json,"6,23",1,0,,1,1,0,0,0,1,"Bangladesh's gross foreign exchange reserves at the end of December 2024 were **US$26.21 billion** [SOURCE 1], as stated in the context. This figure is explicitly compared to the end-of-December 2025 value of US$33.19 billion [SOURCE 1], [SOURCE 3]. 
+
+The context also mentions a separate metric for BPM6-compliant reserves, which stood at **US$28.59 billion** at the end of December 2025 compared to **US$21.39 billion** in December 2024 [SOURCE 2], but this is distinct from ""gross"" reserves. The question specifically asks about gross reserves, so the answer is based on the US$26.21 billion figure.","Bangladesh's gross foreign exchange reserves at the end of December 2024 were **US$26.21 billion** [SOURCE 1], as stated in the context. This figure is explicitly compared to the end-of-December 2025 value of US$33.19 billion [SOURCE 1], [SOURCE 3]. 
+
+The context also mentions a separate metric for BPM6-compliant reserves, which stood at **US$28.59 billion** at the end of December 2025 compared to **US$21.39 billion** in December 2024 [SOURCE 2], but this is distinct from ""gross"" reserves. The question specifically asks about gross reserves, so the answer is based on the US$26.21 billion figure.",294.32969999470515,20459.759999997914,0.0,31909.340300000622,24054.489100002684,76717.91909999592,4.084200001670979,76722.0032999976,"Bangladesh's gross foreign exchange reserves at the end of December 2024 were **US$26.21 billion** [SOURCE 1], as stated in the context. This figure is explicitly compared to the end-of-December 2025 value of US$33.19 billion [SOURCE 1], [SOURCE 3]. 
+
+The context also mentions a separate metric for BPM6-compliant reserves, which stood at **US$28.59 billion** at the end of December 2025 compared to **US$21.39 billion** in December 2024 [SOURCE 2], but this is distinct from ""gross"" reserves. The question specifically asks about gross reserves, so the answer is based on the US$26.21 billion figure."
+econ_003,easy,financial_comparison,How much remittance did Bangladesh receive in December 2025 and how much higher was it than December 2024?,October-December-25-3.json,"5,20",1,0,,1,1,0,0,0,1,"Bangladesh received **US$3,224.27 million** in remittances in December 2025, which was **22.19% higher** than December 2024's remittance inflow of **US$2,638.78 million** [SOURCE 1].","Bangladesh received **US$3,224.27 million** in remittances in December 2025, which was **22.19% higher** than December 2024's remittance inflow of **US$2,638.78 million** [SOURCE 1].",336.8123000036576,23964.1674999948,0.0,47777.998900004604,16106.433499997365,88185.41220000043,3.6019999970449135,88189.01419999747,"Bangladesh received **US$3,224.27 million** in remittances in December 2025, which was **22.19% higher** than December 2024's remittance inflow of **US$2,638.78 million** [SOURCE 1]."
+econ_008,hard,confusable_financial_fact,"Ignoring the BPM6 measure, what reserve figure did Bangladesh report at the end of December 2024?",October-December-25-3.json,"6,23",1,0,,1,1,1,1,1,0,"Bangladesh reported foreign exchange reserves of US$26.21 billion at the end of December 2024, as stated in the context [SOURCE 2]. This figure is explicitly contrasted with the BPM6-compliant reserve data for December 2025 [SOURCE 3], which is excluded per the question's instruction to ignore the BPM6 measure.","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",335.08230000006733,106104.23859999719,0.0,49958.1840000028,38627.26500000281,195024.76990000287,3.1128999980865046,195027.88280000095,"Bangladesh reported foreign exchange reserves of US$26.21 billion at the end of December 2024, as stated in the context [SOURCE 2]. This figure is explicitly contrasted with the BPM6-compliant reserve data for December 2025 [SOURCE 3], which is excluded per the question's instruction to ignore the BPM6 measure."
+econ_009,hard,financial_relationship,How did the Bangladeshi Taka move against the US dollar by December 2025 compared with June 2025 and December 2024?,October-December-25-3.json,"6,23",1,0,,1,1,0,0,0,1,"The Bangladeshi Taka (BDT) appreciated marginally by **0.37%** at the end of December 2025 compared to the end of June 2025 [SOURCE 1]. However, it depreciated by **1.93%** at the end of December 2025 compared to the end of December 2024 [SOURCE 1]. This indicates that the Taka strengthened slightly against the US dollar from June to December 2025 but weakened relative to its level in December 2024.","The Bangladeshi Taka (BDT) appreciated marginally by **0.37%** at the end of December 2025 compared to the end of June 2025 [SOURCE 1]. However, it depreciated by **1.93%** at the end of December 2025 compared to the end of December 2024 [SOURCE 1]. This indicates that the Taka strengthened slightly against the US dollar from June to December 2025 but weakened relative to its level in December 2024.",262.903599999845,24115.281800004595,0.0,88679.57610000303,60992.32049999409,174050.08200000157,3.4844000037992373,174053.56640000537,"The Bangladeshi Taka (BDT) appreciated marginally by **0.37%** at the end of December 2025 compared to the end of June 2025 [SOURCE 1]. However, it depreciated by **1.93%** at the end of December 2025 compared to the end of December 2024 [SOURCE 1]. This indicates that the Taka strengthened slightly against the US dollar from June to December 2025 but weakened relative to its level in December 2024."
+econ_015,hard,monetary_comparison,"Did broad money growth in December 2025 exceed Bangladesh Bank's target, and what were the two rates?",October-December-25-3.json,4,1,0,,1,1,0,0,0,1,"The broad money growth in December 2025 exceeded Bangladesh Bank's target. The actual growth rate was **9.55%** [SOURCE 1], while the central bank's target for December 2025 was **7.80%** [SOURCE 2].","The broad money growth in December 2025 exceeded Bangladesh Bank's target. The actual growth rate was **9.55%** [SOURCE 1], while the central bank's target for December 2025 was **7.80%** [SOURCE 2].",346.57989999686833,20140.096299997822,0.0,55188.90470000042,15324.468600003456,91000.04949999857,3.5619999980553985,91003.61149999662,"The broad money growth in December 2025 exceeded Bangladesh Bank's target. The actual growth rate was **9.55%** [SOURCE 1], while the central bank's target for December 2025 was **7.80%** [SOURCE 2]."
+rlc_001,easy,technical_concept,What are the three damping conditions of a series RLC circuit?,RLC.json,"3,19",1,0,,1,1,0,0,0,1,"The three damping conditions of a series RLC circuit are:  
+1. **Under Damped** (R=500 Ω) [SOURCE 1],  
+2. **Critically Damped** (R=2000 Ω) [SOURCE 1], and  
+3. **Over Damped** (R=4000 Ω) [SOURCE 1].  
+
+These conditions are explicitly defined in the context based on the resistance values and their corresponding behaviors.","The three damping conditions of a series RLC circuit are:  
+1. **Under Damped** (R=500 Ω) [SOURCE 1],  
+2. **Critically Damped** (R=2000 Ω) [SOURCE 1], and  
+3. **Over Damped** (R=4000 Ω) [SOURCE 1].  
+
+These conditions are explicitly defined in the context based on the resistance values and their corresponding behaviors.",241.58170000009704,16123.015099998156,0.0,20871.714000000793,21036.52609999699,58272.83689999604,3.3385000060661696,58276.1754000021,"The three damping conditions of a series RLC circuit are:  
+1. **Under Damped** (R=500 Ω) [SOURCE 1],  
+2. **Critically Damped** (R=2000 Ω) [SOURCE 1], and  
+3. **Over Damped** (R=4000 Ω) [SOURCE 1].  
+
+These conditions are explicitly defined in the context based on the resistance values and their corresponding behaviors."
+rlc_004,medium,technical_limit,What happens to a series RLC circuit when resistance R approaches zero?,RLC.json,5,1,0,,1,1,0,0,0,1,"When resistance $ R $ approaches zero in a series RLC circuit, the circuit reduces to a lossless LC circuit [SOURCE 3]. This is described by the differential equation:  
+$$
+\frac{d^2 v_c}{dt^2} + \frac{1}{LC} v_c = 0 \quad \text{(1.16)}
+$$  
+The solution to this equation involves complex roots $ s = \pm j\omega_0 $, where $ \omega_0 = \frac{1}{\sqrt{LC}} $ [SOURCE 3]. The voltage response becomes a linear combination of sinusoidal functions:  
+$$
+v_c(t) = B_1 \cos(\omega_0 t) + B_2 \sin(\omega_0 t) \quad \text{(1.21)}
+$$  
+This indicates sustained oscillations at the resonant frequency $ \omega_0 $ without damping, as resistance approaches zero [SOURCE 3].","When resistance $ R $ approaches zero in a series RLC circuit, the circuit reduces to a lossless LC circuit [SOURCE 3]. This is described by the differential equation:  
+$$
+\frac{d^2 v_c}{dt^2} + \frac{1}{LC} v_c = 0 \quad \text{(1.16)}
+$$  
+The solution to this equation involves complex roots $ s = \pm j\omega_0 $, where $ \omega_0 = \frac{1}{\sqrt{LC}} $ [SOURCE 3]. The voltage response becomes a linear combination of sinusoidal functions:  
+$$
+v_c(t) = B_1 \cos(\omega_0 t) + B_2 \sin(\omega_0 t) \quad \text{(1.21)}
+$$  
+This indicates sustained oscillations at the resonant frequency $ \omega_0 $ without damping, as resistance approaches zero [SOURCE 3].",185.96039999829372,13548.786300001666,0.0,31390.41559999896,19552.845799997158,64678.00809999608,3.6961000005248934,64681.7041999966,"When resistance $ R $ approaches zero in a series RLC circuit, the circuit reduces to a lossless LC circuit [SOURCE 3]. This is described by the differential equation:  
+$$
+\frac{d^2 v_c}{dt^2} + \frac{1}{LC} v_c = 0 \quad \text{(1.16)}
+$$  
+The solution to this equation involves complex roots $ s = \pm j\omega_0 $, where $ \omega_0 = \frac{1}{\sqrt{LC}} $ [SOURCE 3]. The voltage response becomes a linear combination of sinusoidal functions:  
+$$
+v_c(t) = B_1 \cos(\omega_0 t) + B_2 \sin(\omega_0 t) \quad \text{(1.21)}
+$$  
+This indicates sustained oscillations at the resonant frequency $ \omega_0 $ without damping, as resistance approaches zero [SOURCE 3]."
+rlc_011,hard,technical_formula,How is the damped oscillation frequency related to the natural frequency and damping rate?,RLC.json,"12,19",2,1,damped oscillation frequency ωd natural frequency ω₀ damping rate α,1,1,0,0,0,1,"The damped oscillation frequency (ω_d) is related to the natural frequency (ω₀) and damping rate (α) by the equation:  
+**ω_d = √(ω₀² − α²)** [SOURCE 3].  
+
+This relationship arises from the characteristic equation of the system, $ s^2 + 2\alpha s + \omega_0^2 = 0 $ [SOURCE 2], whose roots determine the system's response. When **α < ω₀** (underdamped case), the oscillation frequency is reduced from the natural frequency by the damping effect, resulting in decaying sinusoidal behavior [SOURCE 3].  
+
+The exact values of ω₀ and α depend on the circuit configuration:  
+- For a series RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{R}{2L} $ [SOURCE 1].  
+- For a parallel RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{1}{2RC} $ [SOURCE 3].  
+
+The damped oscillation frequency is thus inherently tied to both the natural frequency and damping rate through this mathematical relationship.","The damped oscillation frequency (ω_d) is related to the natural frequency (ω₀) and damping rate (α) by the equation:  
+**ω_d = √(ω₀² − α²)** [SOURCE 3].  
+
+This relationship arises from the characteristic equation of the system, $ s^2 + 2\alpha s + \omega_0^2 = 0 $ [SOURCE 2], whose roots determine the system's response. When **α < ω₀** (underdamped case), the oscillation frequency is reduced from the natural frequency by the damping effect, resulting in decaying sinusoidal behavior [SOURCE 3].  
+
+The exact values of ω₀ and α depend on the circuit configuration:  
+- For a series RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{R}{2L} $ [SOURCE 1].  
+- For a parallel RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{1}{2RC} $ [SOURCE 3].  
+
+The damped oscillation frequency is thus inherently tied to both the natural frequency and damping rate through this mathematical relationship.",551.7343000028632,54633.01240000146,17315.730499998608,54837.932499998715,35538.170799998625,162876.58050000027,5.340199997590389,162881.92069999786,"The damped oscillation frequency (ω_d) is related to the natural frequency (ω₀) and damping rate (α) by the equation:  
+**ω_d = √(ω₀² − α²)** [SOURCE 3].  
+
+This relationship arises from the characteristic equation of the system, $ s^2 + 2\alpha s + \omega_0^2 = 0 $ [SOURCE 2], whose roots determine the system's response. When **α < ω₀** (underdamped case), the oscillation frequency is reduced from the natural frequency by the damping effect, resulting in decaying sinusoidal behavior [SOURCE 3].  
+
+The exact values of ω₀ and α depend on the circuit configuration:  
+- For a series RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{R}{2L} $ [SOURCE 1].  
+- For a parallel RLC circuit: $ \omega_0 = \frac{1}{\sqrt{LC}} $, $ \alpha = \frac{1}{2RC} $ [SOURCE 3].  
+
+The damped oscillation frequency is thus inherently tied to both the natural frequency and damping rate through this mathematical relationship."
+rlc_012,hard,technical_equation,What differential equation describes the current response of the parallel RLC circuit?,RLC.json,"10,11",2,1,differential equation parallel RLC circuit current response,1,1,1,1,1,0,"The provided context does not explicitly state the differential equation describing the current response of a parallel RLC circuit. While the text discusses applying Kirchhoff's Current Law (KCL) and initial conditions for such a circuit [SOURCE 1], it does not derive or present the full differential equation for the current response. The equations in the context are focused on series RLC circuits and LC circuits [SOURCE 2][SOURCE 3]. 
+
+I don't know.","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",438.583800001652,23577.18040000327,117997.63439999515,41113.62470000313,0.0,183127.0233000032,5.746299997554161,183132.76960000076,"The provided context does not explicitly state the differential equation describing the current response of a parallel RLC circuit. While the text discusses applying Kirchhoff's Current Law (KCL) and initial conditions for such a circuit [SOURCE 1], it does not derive or present the full differential equation for the current response. The equations in the context are focused on series RLC circuits and LC circuits [SOURCE 2][SOURCE 3]. 
+
+I don't know."
+rlc_016,hard,technical_comparison,How does the damping-rate formula differ between series and parallel RLC circuits?,RLC.json,19,1,0,,1,1,1,1,1,0,"The damping-rate formula (α) differs between series and parallel RLC circuits as follows:  
+
+- **Series RLC Circuit**:  
+  $ \alpha = \frac{R}{2L} $ [SOURCE 2].  
+
+- **Parallel RLC Circuit**:  
+  $ \alpha = \frac{1}{2RC} $ [SOURCE 2].  
+
+Both configurations share the same natural frequency ($\omega_0 = \frac{1}{\sqrt{LC}}$) [SOURCE 2], but the damping factor depends on distinct parameters: resistance and inductance for series, and conductance (via capacitance) for parallel.","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",256.4889999994193,13504.833299994061,0.0,37977.58410000097,27004.636900004698,78743.54329999915,3.4354000017629005,78746.97870000091,"The damping-rate formula (α) differs between series and parallel RLC circuits as follows:  
+
+- **Series RLC Circuit**:  
+  $ \alpha = \frac{R}{2L} $ [SOURCE 2].  
+
+- **Parallel RLC Circuit**:  
+  $ \alpha = \frac{1}{2RC} $ [SOURCE 2].  
+
+Both configurations share the same natural frequency ($\omega_0 = \frac{1}{\sqrt{LC}}$) [SOURCE 2], but the damping factor depends on distinct parameters: resistance and inductance for series, and conductance (via capacitance) for parallel."
+nature_001,easy,conceptual_definition,How does the handbook define nature connection?,the-nature-connection-handbook.json,5,1,0,,1,1,0,0,0,1,"The handbook defines nature connection as ""our relationship with nature – how we think about, feel about, and experience nature."" It emphasizes that when people feel close to nature, they recognize themselves as part of the natural world, value this relationship, notice nature, seek it out, and feel happiness when in its presence [SOURCE 3].","The handbook defines nature connection as ""our relationship with nature – how we think about, feel about, and experience nature."" It emphasizes that when people feel close to nature, they recognize themselves as part of the natural world, value this relationship, notice nature, seek it out, and feel happiness when in its presence [SOURCE 3].",201.48369999515126,12455.852200000663,0.0,20083.584399995743,17911.529199998768,50652.449499990325,3.4342000071774237,50655.8836999975,"The handbook defines nature connection as ""our relationship with nature – how we think about, feel about, and experience nature."" It emphasizes that when people feel close to nature, they recognize themselves as part of the natural world, value this relationship, notice nature, seek it out, and feel happiness when in its presence [SOURCE 3]."
+nature_007,hard,conceptual_paraphrase,Does simply spending more time outdoors necessarily produce a stronger connection with nature?,the-nature-connection-handbook.json,"7,8,9",2,1,spending more time outdoors connection with nature,1,1,0,0,0,1,"The context indicates that spending more time outdoors does not necessarily produce a stronger connection with nature. Research cited in [SOURCE 1] emphasizes that ""noticing nature"" through activities like watching wildlife or listening to birdsong fosters a closer connection, whereas mere time spent in green spaces lacks this effect. Additionally, [SOURCE 1] states that ""engaging with nature through simple activities explains psychological wellbeing better than time spent in nature."" While [SOURCE 2] mentions that spending more time in nature can support connection, it frames this as part of a broader approach involving active engagement with local habitats. The context does not assert that time alone is sufficient for stronger connection.","The context indicates that spending more time outdoors does not necessarily produce a stronger connection with nature. Research cited in [SOURCE 1] emphasizes that ""noticing nature"" through activities like watching wildlife or listening to birdsong fosters a closer connection, whereas mere time spent in green spaces lacks this effect. Additionally, [SOURCE 1] states that ""engaging with nature through simple activities explains psychological wellbeing better than time spent in nature."" While [SOURCE 2] mentions that spending more time in nature can support connection, it frames this as part of a broader approach involving active engagement with local habitats. The context does not assert that time alone is sufficient for stronger connection.",398.76499999081716,16494.993299995258,21080.478500000027,22012.79120000254,36430.73420000292,96417.76219999156,5.361000003176741,96423.12319999473,"The context indicates that spending more time outdoors does not necessarily produce a stronger connection with nature. Research cited in [SOURCE 1] emphasizes that ""noticing nature"" through activities like watching wildlife or listening to birdsong fosters a closer connection, whereas mere time spent in green spaces lacks this effect. Additionally, [SOURCE 1] states that ""engaging with nature through simple activities explains psychological wellbeing better than time spent in nature."" While [SOURCE 2] mentions that spending more time in nature can support connection, it frames this as part of a broader approach involving active engagement with local habitats. The context does not assert that time alone is sufficient for stronger connection."
+nature_008,hard,conceptual_comparison,"According to the handbook, which is more important for pro-environmental action: environmental knowledge or connection with nature?",the-nature-connection-handbook.json,"8,9",1,0,,1,1,0,0,0,1,"According to the handbook, **connection with nature** is more important for pro-environmental action than environmental knowledge. The text explicitly states: ""our connection to nature is much more important than our environmental knowledge in the actions we take to help the environment and wildlife"" [SOURCE 1]. It further explains that while people who feel close to nature may know more about it, **knowledge alone does not lead to nature connection** [SOURCE 1]. Instead, how individuals interact with and feel about the natural world drives pro-environmental behaviors [SOURCE 2], emphasizing emotional and experiential engagement over mere knowledge.","According to the handbook, **connection with nature** is more important for pro-environmental action than environmental knowledge. The text explicitly states: ""our connection to nature is much more important than our environmental knowledge in the actions we take to help the environment and wildlife"" [SOURCE 1]. It further explains that while people who feel close to nature may know more about it, **knowledge alone does not lead to nature connection** [SOURCE 1]. Instead, how individuals interact with and feel about the natural world drives pro-environmental behaviors [SOURCE 2], emphasizing emotional and experiential engagement over mere knowledge.",209.61040000111097,16859.76389999996,0.0,28868.52209999779,23247.286600002553,69185.18300000142,3.328699996927753,69188.51169999834,"According to the handbook, **connection with nature** is more important for pro-environmental action than environmental knowledge. The text explicitly states: ""our connection to nature is much more important than our environmental knowledge in the actions we take to help the environment and wildlife"" [SOURCE 1]. It further explains that while people who feel close to nature may know more about it, **knowledge alone does not lead to nature connection** [SOURCE 1]. Instead, how individuals interact with and feel about the natural world drives pro-environmental behaviors [SOURCE 2], emphasizing emotional and experiential engagement over mere knowledge."
+nature_011,hard,conceptual_application,How can the design of places and spaces help people develop a stronger connection with nature?,the-nature-connection-handbook.json,17,2,1,place design spatial planning nature connection environmental interaction,1,1,1,1,1,0,"The design of places and spaces can foster stronger connections with nature through specific strategies outlined in the context:  
+- **Infrastructure improvements** such as seating and interpretation that encourage dwell time near nature-rich areas [SOURCE 2].  
+- **Wildlife habitat features**, landscaping, and art integrated into environments to draw attention and prompt engagement while navigating sites [SOURCE 2].  
+- **Fixed point photography** installations that invite people to engage with specific natural views [SOURCE 2].  
+- **Place-making initiatives** that use the ""pathways to nature connection"" framework to design spaces promoting active interaction with the natural world [SOURCE 1, SOURCE 3].  
+
+These design elements create opportunities for meaningful engagement with nature through intentional spatial arrangements and interpretive features.","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",318.0021999942255,20693.464399999357,14303.9804,27775.90830000554,48841.39239999786,111932.74769999698,5.335100002412219,111938.08279999939,"The design of places and spaces can foster stronger connections with nature through specific strategies outlined in the context:  
+- **Infrastructure improvements** such as seating and interpretation that encourage dwell time near nature-rich areas [SOURCE 2].  
+- **Wildlife habitat features**, landscaping, and art integrated into environments to draw attention and prompt engagement while navigating sites [SOURCE 2].  
+- **Fixed point photography** installations that invite people to engage with specific natural views [SOURCE 2].  
+- **Place-making initiatives** that use the ""pathways to nature connection"" framework to design spaces promoting active interaction with the natural world [SOURCE 1, SOURCE 3].  
+
+These design elements create opportunities for meaningful engagement with nature through intentional spatial arrangements and interpretive features."
+nature_014,hard,conceptual_relationship,What benefits for people and the environment are associated with stronger nature connection?,the-nature-connection-handbook.json,"7,9",1,0,,1,1,0,0,0,1,"Stronger nature connection is associated with several benefits for both people and the environment, as outlined in the context:  
+
+**For people:**  
+- Improved **wellbeing** and **purpose in life** through psychological connections to nature [SOURCE 1].  
+- Increased **positive emotional experiences** and reduced feelings of isolation, particularly for individuals with lower initial nature connection [SOURCE 2].  
+- Greater motivation to take **environmental action** (e.g., protecting wildlife) due to heightened awareness and engagement [SOURCE 1][SOURCE 2].  
+
+**For the environment:**  
+- A stronger fight against **decreasing biodiversity** through behaviors aimed at protecting wildlife [SOURCE 1].  
+- Fostering **protective environmental behaviors** linked to psychological connections with nature [SOURCE 3].  
+
+These benefits are supported by examples such as art-based interventions (e.g., the Oak Project) that activate pathways to nature connection and inspire action [SOURCE 2].","Stronger nature connection is associated with several benefits for both people and the environment, as outlined in the context:  
+
+**For people:**  
+- Improved **wellbeing** and **purpose in life** through psychological connections to nature [SOURCE 1].  
+- Increased **positive emotional experiences** and reduced feelings of isolation, particularly for individuals with lower initial nature connection [SOURCE 2].  
+- Greater motivation to take **environmental action** (e.g., protecting wildlife) due to heightened awareness and engagement [SOURCE 1][SOURCE 2].  
+
+**For the environment:**  
+- A stronger fight against **decreasing biodiversity** through behaviors aimed at protecting wildlife [SOURCE 1].  
+- Fostering **protective environmental behaviors** linked to psychological connections with nature [SOURCE 3].  
+
+These benefits are supported by examples such as art-based interventions (e.g., the Oak Project) that activate pathways to nature connection and inspire action [SOURCE 2].",228.82560000289232,13075.992599995516,0.0,38254.86490000185,19518.679100001464,71078.36220000172,3.271199995651841,71081.63339999737,"Stronger nature connection is associated with several benefits for both people and the environment, as outlined in the context:  
+
+**For people:**  
+- Improved **wellbeing** and **purpose in life** through psychological connections to nature [SOURCE 1].  
+- Increased **positive emotional experiences** and reduced feelings of isolation, particularly for individuals with lower initial nature connection [SOURCE 2].  
+- Greater motivation to take **environmental action** (e.g., protecting wildlife) due to heightened awareness and engagement [SOURCE 1][SOURCE 2].  
+
+**For the environment:**  
+- A stronger fight against **decreasing biodiversity** through behaviors aimed at protecting wildlife [SOURCE 1].  
+- Fostering **protective environmental behaviors** linked to psychological connections with nature [SOURCE 3].  
+
+These benefits are supported by examples such as art-based interventions (e.g., the Oak Project) that activate pathways to nature connection and inspire action [SOURCE 2]."

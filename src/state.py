@@ -42,46 +42,28 @@ class RewrittenQuery(BaseModel):
     """The rewritten query for vector search."""
     query: str = Field(description="The optimized search query string ONLY.")
 
-class ClaimCheck(BaseModel):
-    """Verification result for one factual claim."""
-    
-    claim: str = Field(
-        description="The factual claim extracted from the generated answer."
-    )
-    
-    is_supported: bool = Field(
-        description="True only if the exact claim is explicitly supported by the context."
-    )
-    
-    evidence: str = Field(
-        description="The exact supporting evidence from context, or an explanation if unsupported."
-    )
-    source_ids: List[int] = Field(
-        default_factory=list,
-        description="Sources that directly support the complete claim."
-    )
+class CitationVerification(BaseModel):
+    """Compact grounding verification result."""
 
-    error_type: Optional[str] = Field(
-        default=None,
+    is_supported: bool = Field(
         description=(
-            "If unsupported: number, date, entity, methodology, "
-            "qualifier, causality, scope, citation, or other."
+            "True only if every factual claim in the answer "
+            "is explicitly supported by the retrieved context."
         )
     )
 
-class CitationVerification(BaseModel):
-    """Claim-level grounding verification."""
-    
-    is_supported: bool = Field(
-        description="True only if every factual claim in the answer is supported."
+    unsupported_claims: List[str] = Field(
+        default_factory=list,
+        description=(
+            "Only factual claims that are unsupported or "
+            "incorrectly grounded. Empty when fully supported."
+        )
     )
-    
-    claims: List[ClaimCheck] = Field(
-        description="Verification result for each factual claim."
-    )
-    
+
     reasoning: str = Field(
-        description="Overall explanation of the verification decision."
+        description=(
+            "One short sentence explaining the decision."
+        )
     )
 
 
