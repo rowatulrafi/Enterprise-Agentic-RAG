@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
 
@@ -23,10 +23,14 @@ class DocumentValidation(BaseModel):
 # ==========================================
 class MasterRAGState(TypedDict):
     question: str
+    search_query: str
     documents: List[RetrievedDocument]
     generation: str
     verification_feedback: Optional[str]
-    retries: int
+
+    rewrite_count: int
+    verification_retries: int
+    
 # ==========================================
 # 3. STRUCTURED LLM OUTPUTS FOR GRAPH
 # ==========================================
@@ -37,11 +41,6 @@ class GradeDocuments(BaseModel):
 class RewrittenQuery(BaseModel):
     """The rewritten query for vector search."""
     query: str = Field(description="The optimized search query string ONLY.")
-
-class CitationVerification(BaseModel):
-    """Evaluates if the generated answer is strictly supported by context."""
-    is_supported: bool = Field(description="True if claims are supported, False if hallucinations exist.")
-    reasoning: str = Field(description="Explanation of unsupported claims, or confirmation of support.")
 
 class ClaimCheck(BaseModel):
     """Verification result for one factual claim."""

@@ -151,7 +151,7 @@ def clean_text_for_llm(text: str) -> str:
 
     return text.strip()
 
-
+  
 # ============================================================
 # NATIVE TEXT QUALITY CHECK
 # ============================================================
@@ -420,6 +420,7 @@ def process_pdfs():
                     page_num = (
                         page_index + 1
                     )
+                    
 
                     print(
                         f"\n  🔍 Page "
@@ -447,14 +448,9 @@ def process_pdfs():
 
                         clean_pages.append(
                             {
-                                "page_num":
-                                    page_num,
-
-                                "text":
-                                    native_text,
-
-                                "extraction_method":
-                                    "native",
+                                "page_num": page_num,
+                                "text": native_text,
+                                "extraction_method": "native",
                             }
                         )
 
@@ -599,17 +595,10 @@ def process_pdfs():
 
                         clean_pages.append(
                             {
-                                "page_num":
-                                    page_num,
-
-                                "text":
-                                    ocr_text,
-
-                                "extraction_method":
-                                    "ocr",
-
-                                "quality_score":
-                                    result.confidence_score,
+                                "page_num": page_num,
+                                "text": ocr_text,
+                                "extraction_method": "ocr",
+                                "quality_score": result.confidence_score,
                             }
                         )
 
@@ -851,6 +840,7 @@ def build_hybrid_databases():
                 ] = page[
                     "quality_score"
                 ]
+
 
             documents.append(
                 Document(
