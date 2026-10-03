@@ -16,7 +16,10 @@ from src.telemetry import (
 
 BASE_DIR = Path(__file__).resolve().parent
 
-DATASET_PATH = BASE_DIR / "dataset.json"
+DATASET_PATH = (
+    BASE_DIR
+    / "holdout20.json"
+)
 
 RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR.mkdir(
@@ -28,27 +31,10 @@ RESULTS_DIR.mkdir(
 # REPRESENTATIVE BENCHMARK
 # ============================================================
 
-SELECTED_IDS = [
-    "econ_001",
-    "econ_003",
-    "econ_008",
-    "econ_009",
-    "econ_015",
-    "rlc_001",
-    "rlc_004",
-    "rlc_011",
-    "rlc_012",
-    "rlc_016",
-    "nature_001",
-    "nature_007",
-    "nature_008",
-    "nature_011",
-    "nature_014",
-]
 
 OUTPUT_PATH = (
     RESULTS_DIR
-    / f"end_to_end_dev{len(SELECTED_IDS)}_results.csv"
+    / "holdout20_first_run.csv"
 )
 
 
@@ -67,17 +53,10 @@ with open(
     full_dataset = json.load(file)
 
 
-dataset_by_id = {
-    item["id"]: item
-    for item in full_dataset
-}
 
 from src.config import llm
 
-dataset = [
-    dataset_by_id[item_id]
-    for item_id in SELECTED_IDS
-]
+dataset = full_dataset
 
 
 # ============================================================
@@ -152,6 +131,8 @@ def run_query(item):
 
     rewritten_queries = []
 
+    generation_history = []
+    
     first_draft = ""
     final_answer = ""
 
@@ -218,8 +199,6 @@ def run_query(item):
             elif node_name == "generate":
 
                 generation_count += 1
-
-                generation_history = []
 
                 generation = (
                     node_update.get(

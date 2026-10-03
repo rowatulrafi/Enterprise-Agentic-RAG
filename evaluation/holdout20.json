@@ -1,0 +1,204 @@
+[
+  {
+    "id": "holdout_econ_001",
+    "difficulty": "medium",
+    "category": "financial_comparison",
+    "question": "How much foreign aid was disbursed to Bangladesh in July-December of FY26, and by what percentage did it decline from the same period of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [18, 19],
+    "reference_answer": "US$2.50 billion was disbursed, down 29.18% from US$3.53 billion in July-December of FY25.",
+    "rubric": "Must state US$2.50 billion and 29.18% decline; FY25 comparator may also be given."
+  },
+  {
+    "id": "holdout_econ_002",
+    "difficulty": "hard",
+    "category": "financial_comparison",
+    "question": "How did Bangladesh's foreign aid commitments change in July-December of FY26 compared with the same period of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [19],
+    "reference_answer": "Commitments fell 13.48% to US$1.99 billion from US$2.30 billion.",
+    "rubric": "Must preserve the commitment metric and correctly pair 1.99, 2.30 and 13.48%."
+  },
+  {
+    "id": "holdout_econ_003",
+    "difficulty": "medium",
+    "category": "remittance_fact",
+    "question": "Which three countries were the largest sources of Bangladesh's remittances in July-December of FY26, and what shares did they contribute?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [18],
+    "reference_answer": "Saudi Arabia 15.62%, United Kingdom 12.76%, and United Arab Emirates 12.66%.",
+    "rubric": "Must identify the top three in the correct order with their correct shares."
+  },
+  {
+    "id": "holdout_econ_004",
+    "difficulty": "hard",
+    "category": "financial_composition",
+    "question": "Of the US$2.50 billion in foreign aid disbursed in July-December of FY26, how much came as loans and how much as grants?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [18, 19],
+    "reference_answer": "US$2.26 billion came as loans and US$0.24 billion as grants.",
+    "rubric": "Must not confuse disbursements with commitments; loans 2.26 and grants 0.24."
+  },
+  {
+    "id": "holdout_econ_005",
+    "difficulty": "medium",
+    "category": "employment_comparison",
+    "question": "How did Bangladesh's manpower exports in October-December of FY26 compare with the corresponding quarter of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [22],
+    "reference_answer": "They decreased 6.29% to 293,452 persons from 313,138 persons.",
+    "rubric": "Must state the decline, 6.29%, and the correct two employment counts."
+  },
+  {
+    "id": "holdout_econ_006",
+    "difficulty": "medium",
+    "category": "inflation_comparison",
+    "question": "What were Bangladesh's food and non-food inflation rates in December 2025, and how had each changed from November?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [22, 23],
+    "reference_answer": "Food inflation rose to 7.71% from 7.36%; non-food inflation rose to 9.13% from 9.08%.",
+    "rubric": "Must correctly pair food with 7.71/7.36 and non-food with 9.13/9.08."
+  },
+  {
+    "id": "holdout_econ_007",
+    "difficulty": "hard",
+    "category": "debt_composition",
+    "question": "How much foreign debt did Bangladesh repay in July-December of FY26, and how was that amount split between principal and interest?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [19],
+    "reference_answer": "Bangladesh repaid US$2.20 billion: US$1.43 billion principal and US$0.77 billion interest.",
+    "rubric": "Must give total 2.20 and correctly distinguish principal 1.43 from interest 0.77."
+  },
+
+  {
+    "id": "holdout_rlc_001",
+    "difficulty": "medium",
+    "category": "technical_solution",
+    "question": "What is the particular solution for the capacitor voltage in the driven series RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [1],
+    "reference_answer": "The particular solution is vc,p = Vs.",
+    "rubric": "Must state that the particular capacitor-voltage solution equals the source voltage Vs."
+  },
+  {
+    "id": "holdout_rlc_002",
+    "difficulty": "medium",
+    "category": "technical_solution",
+    "question": "What is the particular solution for the inductor current in the driven parallel RLC circuit?",
+    "expected_source": "RLC.json",
+    "expected_pages": [10],
+    "reference_answer": "The particular solution is iL,p(t) = Is.",
+    "rubric": "Must state that the particular inductor-current solution equals the source current Is."
+  },
+  {
+    "id": "holdout_rlc_003",
+    "difficulty": "hard",
+    "category": "technical_relationship",
+    "question": "In the parallel RLC derivation, how are the resistor and capacitor currents expressed in terms of derivatives of the inductor current?",
+    "expected_source": "RLC.json",
+    "expected_pages": [9, 10],
+    "reference_answer": "iR = (L/R) diL/dt and iC = LC d²iL/dt².",
+    "rubric": "Both expressions must be correct, including derivative order and coefficients."
+  },
+  {
+    "id": "holdout_rlc_004",
+    "difficulty": "hard",
+    "category": "technical_limit",
+    "question": "For the parallel RLC circuit, what does the current response approach when resistance R becomes very large?",
+    "expected_source": "RLC.json",
+    "expected_pages": [13],
+    "reference_answer": "For R → ∞, α becomes much smaller than ω0, ωd ≈ ω0, and the response reduces to iL(t) = Is - Is cos(ω0 t), corresponding to an LC response.",
+    "rubric": "Must identify the LC limiting behavior and the reduced current expression or its equivalent."
+  },
+  {
+    "id": "holdout_rlc_005",
+    "difficulty": "hard",
+    "category": "technical_formula",
+    "question": "What form does the critically damped current response take when the characteristic equation has a repeated root?",
+    "expected_source": "RLC.json",
+    "expected_pages": [18, 19],
+    "reference_answer": "The response has the form iL(t) = A1 t e^(-αt) + A2 e^(-αt).",
+    "rubric": "Must include both the exponential term and the t-times-exponential term."
+  },
+  {
+    "id": "holdout_rlc_006",
+    "difficulty": "medium",
+    "category": "technical_formula",
+    "question": "For a lossless LC circuit with initial capacitor voltage V0 and zero initial current, what is the circuit current as a function of time?",
+    "expected_source": "RLC.json",
+    "expected_pages": [5, 6],
+    "reference_answer": "i(t) = -C V0 ω0 sin(ω0 t).",
+    "rubric": "Must preserve the negative sign, C, V0, ω0 and sine dependence."
+  },
+  {
+    "id": "holdout_rlc_007",
+    "difficulty": "medium",
+    "category": "technical_concept",
+    "question": "Why does the usual two-exponential assumption fail in the critically damped case of a second-order RLC system?",
+    "expected_source": "RLC.json",
+    "expected_pages": [18],
+    "reference_answer": "Because the two characteristic roots are equal, the assumed exponentials are not independent and provide only one arbitrary constant, so they cannot satisfy two initial conditions.",
+    "rubric": "Must connect the repeated root to loss of an independent solution and inability to satisfy two initial conditions."
+  },
+
+  {
+    "id": "holdout_nature_001",
+    "difficulty": "medium",
+    "category": "case_study_outcome",
+    "question": "What outcomes did evaluations of the Oak Project report, and who benefited most from the 'Silence' installation?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [23],
+    "reference_answer": "The artworks increased nature connection, inspired people to help nature and produced positive emotional experiences; 'Silence' increased nature connection and wellbeing, with greatest benefits among people who started with lower nature connection and wellbeing.",
+    "rubric": "Must mention increased connection/wellbeing or environmental motivation and identify lower-baseline participants as benefiting most."
+  },
+  {
+    "id": "holdout_nature_002",
+    "difficulty": "hard",
+    "category": "policy_application",
+    "question": "What did the Mental Health Foundation policy briefing recommend using to measure policy effectiveness instead of people's time in or visits to nature?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [24],
+    "reference_answer": "It recommended using connection with nature as the measure of policy effectiveness.",
+    "rubric": "Must explicitly contrast nature connection with time/visits to nature."
+  },
+  {
+    "id": "holdout_nature_003",
+    "difficulty": "medium",
+    "category": "case_study_strategy",
+    "question": "What three broad approaches does Plymouth's Green Minds project use to change the city's relationship with nature?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [25],
+    "reference_answer": "Creating green mindsets (rewilding people), rewilding daily urban life through natural infrastructure and nature-friendly land management, and treating nature as a stakeholder through complexity-management approaches to integrated land-use policy.",
+    "rubric": "Must capture all three approaches; wording need not be verbatim."
+  },
+  {
+    "id": "holdout_nature_004",
+    "difficulty": "medium",
+    "category": "case_study_application",
+    "question": "Who is the Norfolk and Waveney Mind Nature Connect programme intended to support, and what kinds of activities does it use?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [31],
+    "reference_answer": "It targets people who are socially isolated and at risk of mental health problems, using activities such as sowing/growing, mindful walks, forest bathing, creative activities and local nature-based projects.",
+    "rubric": "Must identify the target group and at least two representative activities."
+  },
+  {
+    "id": "holdout_nature_005",
+    "difficulty": "hard",
+    "category": "educational_strategy",
+    "question": "How does the Generation Wild project differ from earlier curriculum- and knowledge-focused approaches to outdoor learning?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [32],
+    "reference_answer": "Generation Wild shifts from curriculum requirements and knowledge acquisition toward helping children connect emotionally with nature through activities based on the pathways to nature connection.",
+    "rubric": "Must state the shift from knowledge/curriculum toward emotional nature connection and pathway-based activities."
+  },
+  {
+    "id": "holdout_nature_006",
+    "difficulty": "medium",
+    "category": "design_case_study",
+    "question": "How do Studio Weave's 'Hear Heres' structures encourage people to engage with nature?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [36],
+    "reference_answer": "The structures amplify natural sounds in different locations, encouraging visitors to pause, listen, explore and engage with the landscape through rich sensory experience and play.",
+    "rubric": "Must mention amplification/listening to natural sounds and the intended pause/exploration or sensory engagement."
+  }
+]
