@@ -63,6 +63,9 @@ dataset = full_dataset
 # ============================================================
 
 SELECTED_IDS = [
+    "holdout_rlc_001",
+    "holdout_rlc_002",
+    "holdout_rlc_003",
     "holdout_rlc_004",
 ]
 
@@ -74,7 +77,7 @@ dataset = [
 
 OUTPUT_PATH = (
     RESULTS_DIR
-    / "v2_rlc004_excerpt_grader_latency.csv"
+    / "v2_rlc_thinking_grader_nothink_rewriter4.csv"
 )
 
 # ============================================================

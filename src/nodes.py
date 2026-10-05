@@ -185,6 +185,7 @@ Question:
 
 Retrieved evidence excerpts:
 {document}
+
 """
         ),
     ]
@@ -248,9 +249,14 @@ Examples:
 """
         ),
         (
-            "human",
-            "Question:\n{question}",
-        ),
+    "human",
+    """
+Question:
+{question}
+
+/no_think
+"""
+),
     ]
 )
 
