@@ -43,26 +43,40 @@ class RewrittenQuery(BaseModel):
     query: str = Field(description="The optimized search query string ONLY.")
 
 class CitationVerification(BaseModel):
-    """Compact grounding verification result."""
+    """
+    Grounding verification result.
+
+    Unsupported optional material may be removed only when
+    the core answer required by the question is still correct.
+    """
 
     is_supported: bool = Field(
         description=(
-            "True only if every factual claim in the answer "
-            "is explicitly supported by the retrieved context."
+            "True only when the entire generated answer is "
+            "explicitly supported by the retrieved context."
+        )
+    )
+
+    core_answer_supported: bool = Field(
+        description=(
+            "True only when the minimum information required "
+            "to answer the user's actual question is correct "
+            "and explicitly supported by the context."
         )
     )
 
     unsupported_claims: List[str] = Field(
         default_factory=list,
         description=(
-            "Only factual claims that are unsupported or "
-            "incorrectly grounded. Empty when fully supported."
+            "Exact contiguous substrings copied verbatim from "
+            "the generated answer that are unsupported and can "
+            "be deleted. Never paraphrase these strings."
         )
     )
 
     reasoning: str = Field(
         description=(
-            "One short sentence explaining the decision."
+            "One short sentence explaining the verification decision."
         )
     )
 

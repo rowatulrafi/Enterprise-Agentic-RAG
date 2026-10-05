@@ -1,0 +1,33 @@
+question_id,difficulty,category,question,expected_source,expected_pages,retrieve_calls,rewrite_calls,rewritten_queries,generation_calls,verification_calls,verifier_rejections,draft_changed,safe_fallback,has_source_citation,first_draft,final_answer,retrieval_ms,grading_ms,rewrite_ms,generation_ms,verification_ms,accounted_stage_ms,framework_overhead_ms,end_to_end_ms,generation_history
+holdout_rlc_001,medium,technical_solution,What is the particular solution for the capacitor voltage in the driven series RLC circuit?,RLC.json,1,2,1,particular solution capacitor voltage V_c driven series RLC circuit,1,1,0,0,0,1,The context does not explicitly provide the particular solution for the capacitor voltage in the driven series RLC circuit. It only states that the solution to the differential equation (1.5) is the sum of homogeneous and particular solutions [SOURCE 1]. The specific form of the particular solution is not derived or given in the retrieved text.,The context does not explicitly provide the particular solution for the capacitor voltage in the driven series RLC circuit. It only states that the solution to the differential equation (1.5) is the sum of homogeneous and particular solutions [SOURCE 1]. The specific form of the particular solution is not derived or given in the retrieved text.,635.3377999985241,13637.6608999999,35279.32490000239,17541.161699999066,18394.65249999921,85488.1377999991,6.221000003279187,85494.35880000237,The context does not explicitly provide the particular solution for the capacitor voltage in the driven series RLC circuit. It only states that the solution to the differential equation (1.5) is the sum of homogeneous and particular solutions [SOURCE 1]. The specific form of the particular solution is not derived or given in the retrieved text.
+holdout_rlc_002,medium,technical_solution,What is the particular solution for the inductor current in the driven parallel RLC circuit?,RLC.json,10,2,1,particular solution inductor current driven parallel RLC circuit,1,1,1,1,1,0,"The provided context does not explicitly state the particular solution for the inductor current in the driven parallel RLC circuit. While it discusses solving differential equations and initial conditions for both series and parallel configurations, the specific form of the particular solution for $ i_L(t) $ in the parallel case is not derived or presented in the retrieved sources. 
+
+I don't know based on the retrieved context.","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",608.4380999964196,23355.905500000517,33643.327199999476,44498.92600000021,0.0,102106.59679999662,5.963700001302641,102112.56049999793,"The provided context does not explicitly state the particular solution for the inductor current in the driven parallel RLC circuit. While it discusses solving differential equations and initial conditions for both series and parallel configurations, the specific form of the particular solution for $ i_L(t) $ in the parallel case is not derived or presented in the retrieved sources. 
+
+I don't know based on the retrieved context."
+holdout_rlc_003,hard,technical_relationship,"In the parallel RLC derivation, how are the resistor and capacitor currents expressed in terms of derivatives of the inductor current?",RLC.json,"9,10",2,1,parallel RLC derivation resistor current capacitor current derivative inductor current,1,1,1,1,1,0,"The resistor current $ i_R(t) $ is proportional to the derivative of the inductor current:  
+$$
+i_R(t) = -\frac{L}{R} \frac{di_L(t)}{dt}
+$$  
+This follows from $ v = -L \frac{di_L}{dt} $ and Ohm's law $ i_R = \frac{v}{R} $.  
+
+The capacitor current $ i_C(t) $ is proportional to the second derivative of the inductor current:  
+$$
+i_C(t) = -CL \frac{d^2i_L(t)}{dt^2}
+$$  
+This arises from substituting $ v = -L \frac{di_L}{dt} $ into $ i_C = C \frac{dv}{dt} $.  
+
+These relationships are derived from the voltage-current relations of the inductor and capacitor, combined with Kirchhoff's laws [SOURCE 1], [SOURCE 2].","I'm sorry, the retrieved context does not contain enough verified information to safely answer this question.",630.4041000039433,34999.87460000557,27523.79619999556,57501.70619999699,57494.354100002965,178150.13520000502,5.539599995245226,178155.67480000027,"The resistor current $ i_R(t) $ is proportional to the derivative of the inductor current:  
+$$
+i_R(t) = -\frac{L}{R} \frac{di_L(t)}{dt}
+$$  
+This follows from $ v = -L \frac{di_L}{dt} $ and Ohm's law $ i_R = \frac{v}{R} $.  
+
+The capacitor current $ i_C(t) $ is proportional to the second derivative of the inductor current:  
+$$
+i_C(t) = -CL \frac{d^2i_L(t)}{dt^2}
+$$  
+This arises from substituting $ v = -L \frac{di_L}{dt} $ into $ i_C = C \frac{dv}{dt} $.  
+
+These relationships are derived from the voltage-current relations of the inductor and capacitor, combined with Kirchhoff's laws [SOURCE 1], [SOURCE 2]."
+holdout_rlc_004,hard,technical_limit,"For the parallel RLC circuit, what does the current response approach when resistance R becomes very large?",RLC.json,13,2,1,parallel RLC circuit current response resistance approaches infinity,1,1,0,0,0,1,"When resistance $ R $ becomes very large in a parallel RLC circuit, the damping factor $ \alpha = \frac{1}{2RC} $ approaches zero. Since $ \alpha < \omega_0 $ (where $ \omega_0 = \frac{1}{\sqrt{LC}} $), the system becomes underdamped, and the current response approaches a decaying oscillatory behavior described by $ e^{-\alpha t}(K_1 \cos \omega_d t + K_2 \sin \omega_d t) $, where $ \omega_d = \sqrt{\omega_0^2 - \alpha^2} $. [SOURCE 1]","When resistance $ R $ becomes very large in a parallel RLC circuit, the damping factor $ \alpha = \frac{1}{2RC} $ approaches zero. Since $ \alpha < \omega_0 $ (where $ \omega_0 = \frac{1}{\sqrt{LC}} $), the system becomes underdamped, and the current response approaches a decaying oscillatory behavior described by $ e^{-\alpha t}(K_1 \cos \omega_d t + K_2 \sin \omega_d t) $, where $ \omega_d = \sqrt{\omega_0^2 - \alpha^2} $. [SOURCE 1]",458.82340000389377,268106.91360000055,101353.49989999668,120490.90869999782,48615.75129999983,539025.8968999988,5.431900004623458,539031.3288000034,"When resistance $ R $ becomes very large in a parallel RLC circuit, the damping factor $ \alpha = \frac{1}{2RC} $ approaches zero. Since $ \alpha < \omega_0 $ (where $ \omega_0 = \frac{1}{\sqrt{LC}} $), the system becomes underdamped, and the current response approaches a decaying oscillatory behavior described by $ e^{-\alpha t}(K_1 \cos \omega_d t + K_2 \sin \omega_d t) $, where $ \omega_d = \sqrt{\omega_0^2 - \alpha^2} $. [SOURCE 1]"

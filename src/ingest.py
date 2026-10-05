@@ -151,7 +151,38 @@ def clean_text_for_llm(text: str) -> str:
 
     return text.strip()
 
-  
+def clean_text_preserve_layout(
+    text: str,
+) -> str:
+    """
+    Preserve horizontal spacing and line layout for
+    equations/tables while removing unsafe control chars.
+    """
+
+    if not text:
+        return ""
+
+    text = re.sub(
+        r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]",
+        "",
+        text,
+    )
+
+    text = text.replace(
+        "\\",
+        "/",
+    )
+
+    # Preserve horizontal spacing.
+    # Only collapse excessive blank lines.
+    text = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        text,
+    )
+
+    return text.strip()
+
 # ============================================================
 # NATIVE TEXT QUALITY CHECK
 # ============================================================
@@ -775,6 +806,8 @@ def build_hybrid_databases():
 
     total_pages = 0
 
+    page_context_data = []
+
     # --------------------------------------------------------
     # LOAD CLEAN DOCUMENTS
     # --------------------------------------------------------
@@ -795,7 +828,22 @@ def build_hybrid_databases():
             pages = json.load(
                 file
             )
+            source_pdf_path = os.path.join(
+                RAW_PDF_DIR,
+                f"{os.path.splitext(json_file)[0]}.pdf",
+            )
 
+            source_pdf = None
+
+            if os.path.exists(
+                source_pdf_path
+            ):
+                try:
+                    source_pdf = pymupdf.open(
+                        source_pdf_path
+                    )
+                except Exception:
+                    source_pdf = None
         for page in pages:
 
             text = (
@@ -817,6 +865,43 @@ def build_hybrid_databases():
                 )
             )
 
+            layout_text = text
+
+            if (
+                extraction_method == "native"
+                and source_pdf is not None
+            ):
+
+                page_index = (
+                    int(page["page_num"])
+                    - 1
+                )
+
+                if (
+                    0
+                    <= page_index
+                    < len(source_pdf)
+                ):
+
+                    raw_layout_text = (
+                        source_pdf[
+                            page_index
+                        ].get_text(
+                            "text",
+                            sort=True,
+                        )
+                    )
+
+                    preserved_layout = (
+                        clean_text_preserve_layout(
+                            raw_layout_text
+                        )
+                    )
+
+                    if preserved_layout:
+                        layout_text = (
+                            preserved_layout
+                        )
             metadata = {
                 "source":
                     json_file,
@@ -849,8 +934,18 @@ def build_hybrid_databases():
                 )
             )
 
+            page_context_data.append(
+                {
+                    "source": json_file,
+                    "page": page["page_num"],
+                    "content": layout_text,
+                    "extraction_method":
+                        extraction_method,
+                }
+            )
             total_pages += 1
-
+        if source_pdf is not None:
+            source_pdf.close()
     if not documents:
 
         print(
@@ -877,7 +972,41 @@ def build_hybrid_databases():
             documents
         )
     )
+    # --------------------------------------------------------
+    # ADD PAGE-LOCAL CHUNK POSITION METADATA
+    # --------------------------------------------------------
 
+    page_chunk_counters = {}
+
+    for chunk in chunks:
+
+        key = (
+            chunk.metadata["source"],
+            chunk.metadata["page"],
+        )
+
+        chunk_index = page_chunk_counters.get(
+            key,
+            0,
+        )
+
+        chunk.metadata["chunk_index"] = chunk_index
+
+        page_chunk_counters[key] = (
+            chunk_index + 1
+        )
+
+
+    for chunk in chunks:
+
+        key = (
+            chunk.metadata["source"],
+            chunk.metadata["page"],
+        )
+
+        chunk.metadata["page_chunk_count"] = (
+            page_chunk_counters[key]
+        )
     print(
         f"\nPrepared "
         f"{len(chunks)} chunks "
@@ -960,6 +1089,24 @@ def build_hybrid_databases():
     print(
         "\n🎉 Ingestion complete."
     )
+    
+    page_context_path = os.path.join(
+        DATA_DIR,
+        "page_context.json",
+    )
+
+    with open(
+        page_context_path,
+        "w",
+        encoding="utf-8",
+    ) as file:
+
+        json.dump(
+            page_context_data,
+            file,
+            indent=2,
+            ensure_ascii=False,
+        )
 
     print(
         f"   Pages  : "

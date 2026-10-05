@@ -58,6 +58,24 @@ from src.config import llm
 
 dataset = full_dataset
 
+# ============================================================
+# LOAD DATASET Customised
+# ============================================================
+
+SELECTED_IDS = [
+    "holdout_rlc_004",
+]
+
+dataset = [
+    item
+    for item in full_dataset
+    if item["id"] in SELECTED_IDS
+]
+
+OUTPUT_PATH = (
+    RESULTS_DIR
+    / "v2_rlc004_excerpt_grader_latency.csv"
+)
 
 # ============================================================
 # HELPERS
@@ -69,6 +87,9 @@ SAFE_FALLBACK_PHRASES = [
     "not contain enough",
     "cannot safely answer",
     "can't safely answer",
+    "does not provide sufficient information",
+    "does not contain sufficient information",
+    "lacks sufficient information",
 ]
 
 

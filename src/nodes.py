@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 from src.telemetry import measure_stage
 from langchain_core.prompts import ChatPromptTemplate
@@ -8,18 +9,29 @@ from langchain_core.output_parsers import StrOutputParser
 
 from src.config import llm, embeddings, cross_encoder, CHROMA_DIR, DATA_DIR
 from src.state import GradeDocuments, RewrittenQuery, CitationVerification
-from src.retrieval import hybrid_rerank_retriever
+from src.retrieval import (
+    retrieve_with_neighbor_context,
+)
 # ==========================================
 # 0. Helper for formatting context
 # ==========================================
-def format_context(documents):
+def format_context(
+    documents,
+    selected_indices=None,
+):
 
     formatted_sections = []
 
     for index, doc in enumerate(
         documents,
-        start=1
+        start=1,
     ):
+
+        if (
+            selected_indices is not None
+            and index not in selected_indices
+        ):
+            continue
 
         formatted_sections.append(
             f"""
@@ -35,6 +47,93 @@ Extraction: {doc["extraction_method"]}
     return "\n\n".join(
         formatted_sections
     )
+
+def extract_cited_source_indices(
+    generation: str,
+):
+
+    matches = re.findall(
+        r"\[SOURCE\s+(\d+)\]",
+        generation,
+        flags=re.IGNORECASE,
+    )
+
+    return {
+        int(match)
+        for match in matches
+    }
+
+def redact_unsupported_claims(
+    generation: str,
+    unsupported_claims,
+):
+    """
+    Delete verifier-identified unsupported spans.
+
+    Safety rule:
+    every span must occur verbatim in the generated answer.
+    If even one span cannot be matched exactly, fail closed.
+    """
+
+    if not unsupported_claims:
+        return None
+
+    cleaned = generation
+
+    for claim in unsupported_claims:
+
+        claim = claim.strip()
+
+        if not claim:
+            return None
+
+        # Verifier MUST provide an exact substring.
+        if claim not in cleaned:
+            print(
+                "⚠️ Redaction failed: verifier returned "
+                "a non-verbatim unsupported span."
+            )
+            return None
+
+        cleaned = cleaned.replace(
+            claim,
+            "",
+            1,
+        )
+
+    # Cosmetic cleanup only.
+    # No factual rewriting occurs here.
+    cleaned = re.sub(
+        r"[ \t]+\n",
+        "\n",
+        cleaned,
+    )
+
+    cleaned = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        cleaned,
+    )
+
+    cleaned = re.sub(
+        r"[ \t]{2,}",
+        " ",
+        cleaned,
+    )
+
+    cleaned = re.sub(
+        r"\s+([,.;:!?])",
+        r"\1",
+        cleaned,
+    )
+
+    cleaned = cleaned.strip()
+
+    if not cleaned:
+        return None
+
+    return cleaned
+
 # ==========================================
 # 1. INITIALIZE HYBRID RETRIEVAL
 # ==========================================
@@ -54,12 +153,9 @@ grade_prompt = ChatPromptTemplate.from_messages(
             """
 You are a strict retrieval sufficiency grader.
 
-You receive a user's question and the complete retrieved
-context that would be supplied to the answer generator.
+You receive a user's question and the retrieval evidence excerpts that selected the pages available to the answer generator.
 
-Return YES only if the retrieved context, taken together,
-contains enough explicit evidence to answer the exact
-question faithfully.
+Return YES only if the retrieved context, taken together, contains enough explicit evidence to answer the exact question faithfully.
 
 Return NO when:
 - passages are merely about the same topic;
@@ -68,10 +164,15 @@ Return NO when:
 - an equation is requested but that equation is absent;
 - answering requires outside knowledge or inference;
 - an example is present but the requested general rule is absent.
+- the question asks for an outcome under a condition, limit,
+  threshold, or parameter regime, but the context does not
+  explicitly connect that SAME condition to the requested outcome;
+- a general equation, steady-state value, parameter definition,
+  or nearby operating case is present, but the requested limiting
+  or conditional result itself is absent.
 
 For mathematical text, imperfect extraction is acceptable.
-Equations and symbols count as evidence when they actually
-support the requested relationship.
+Equations and symbols count as evidence when they actually support the requested relationship.
 
 Do not answer the question.
 """
@@ -82,7 +183,7 @@ Do not answer the question.
 Question:
 {question}
 
-Retrieved context:
+Retrieved evidence excerpts:
 {document}
 """
         ),
@@ -126,6 +227,24 @@ Examples:
 Do not turn "nature connection" into unrelated expansions
 such as "biophilia", "ecological identity", or
 "environmental attachment".
+
+- For limiting-language queries, preserve the original wording
+  and add direct mathematical equivalents when applicable.
+
+- Also add the retrieval terms "limit" and "limiting case"
+  when the question explicitly asks what happens as a parameter
+  becomes very large, very small, approaches zero, or approaches
+  infinity.
+
+Examples:
+"becomes very large"
+-> "becomes very large, approaches infinity, limit, limiting case"
+
+"approaches zero"
+-> "approaches zero, limit, limiting case"
+
+- Never remove the original wording.
+
 """
         ),
         (
@@ -146,64 +265,73 @@ You are a grounded retrieval assistant.
 
 Answer ONLY using the provided context.
 
-GROUNDING RULES:
-1. Every factual claim must be explicitly supported by the context.
-2. Preserve exact entity, year, date, quantity, comparison, and qualifier relationships.
-3. Never transfer a statement about one year, entity, or metric to another.
-4. Never infer causation unless the context explicitly states the causal relationship.
-5. Do not combine separate facts in a way that changes their meaning.
-6. If information is missing, explicitly say that the context does not provide it.
-7. If the context cannot answer the question, say "I don't know".
-8. Cite factual claims using the source labels provided in the context.
-9. Use the format [SOURCE 1], [SOURCE 2], etc.
-10. Never cite a source that does not support the associated statement.
-13. Preserve qualifiers exactly as they appear in the source.
-14. Never attach a methodology, definition, date, unit, status,
-    or qualifier to a number unless the source explicitly associates
-    that qualifier with that number.
-15. Distinguish general rules from document-specific examples.
-    Example parameter values must never be presented as universal rules.
-16. When a source gives multiple versions of the same metric
-    (for example gross reserves vs BPM6-compliant reserves),
-    keep the metric names and values strictly paired.
-17. If the retrieved context lacks a fact, do not provide that fact
-even as an example, clarification, parenthetical, common formula,
-or outside-knowledge note.
+ANSWERING AND GROUNDING RULES:
 
-GENERIC RULES:
-- Answer only what is necessary to answer the question.
-- Do not add unrelated caveats, alternative metrics, or extra facts unless they are necessary for disambiguation.
+1. Answer ONLY using the retrieved context.
 
-GROUNDING RULES:
+2. Answer only what the user actually asked.
+   Give the shortest complete answer possible.
+   Once every requested part is answered, STOP.
 
-1. QUALIFIER BINDING
-A qualifier belongs only to the value/entity it explicitly
-modifies. Never transfer terms such as gross, net, BPM6,
-provisional, revised, annual, monthly, FY25 or FY26 to a
-neighboring value.
+3. Every factual claim must be explicitly supported by the context.
+   Do not use outside knowledge, even in examples, clarifications,
+   parentheses, or common formulas.
 
-2. GENERAL RULE VS EXAMPLE
-Never present example-specific values as universal rules.
-If an example is useful, explicitly label it as an example.
-For mathematical expressions, preserve the exact equation structure provided by the source. Do not drop or alter exponents, roots, signs, subscripts, or operators.
+4. Preserve exact entity, year, date, quantity, unit, metric,
+   methodology, comparison, and qualifier relationships.
+   Never transfer a qualifier or value to another entity, year,
+   metric, or methodology.
 
-3. CAUSALITY
-Use causal language only when the context explicitly states
-a causal relationship between the SAME variables.
+5. If the source contains multiple versions of a metric,
+   keep each value strictly paired with its correct definition
+   and methodology.
 
-4. SOURCE TERMINOLOGY
-Prefer terminology actually used in the retrieved context.
-Do not invent related technical or conceptual labels.
+6. For mathematical expressions, preserve the exact equation
+   structure from the source. Do not alter exponents, roots,
+   signs, subscripts, operators, or equality relationships.
 
-5. SCOPE
-Do not combine facts from different entities, years,
-methodologies or measurement definitions as if they belong
-to one statement.
+7. Distinguish general rules from document-specific examples.
+   Never present example-specific parameter values as universal rules.
 
-6. MISSING EVIDENCE
-If retrieved context is insufficient, say that the RETRIEVED
-CONTEXT does not contain enough information. Do not claim
-that the entire source document lacks the information.
+8. Use causal or comparative language only when that exact
+   relationship is explicitly supported by the context.
+   Do not infer characteristics of one side of a comparison.
+
+9. Identify every part of the question and answer each directly.
+   If the question asks how something changed and the context
+   explicitly provides a percentage or amount of change, include it.
+
+10. Do not add unrelated background, alternative metrics,
+    component breakdowns, examples, implications, caveats,
+    or related facts unless they are required to answer the question.
+
+11. Never state a fact and later claim that the retrieved context
+    does not provide that same fact.
+
+12. Cite factual claims using [SOURCE 1], [SOURCE 2], etc.
+    Never cite a source that does not support the associated claim.
+
+13. If any required part genuinely cannot be answered from the
+    retrieved context, do not infer or reconstruct it.
+    Say only:
+    "I don't know based on the retrieved context."
+
+EXACT ANSWER EXTRACTION:
+
+- When the question asks for an equation, mathematical response,
+  particular solution, limiting response, formula, or expression,
+  and the retrieved context explicitly provides that expression,
+  reproduce the expression exactly.
+
+- Do not replace an explicit mathematical result with only a
+  qualitative description.
+
+- If the context says "the solution reduces to", "the particular
+  solution is", "the response becomes", or equivalent wording,
+  treat the following expression as the primary answer.
+
+- Preserve every coefficient, variable, factor, sign, exponent,
+  derivative order, subscript, and operator exactly.
 
 {feedback}
 """
@@ -224,40 +352,95 @@ verify_prompt = ChatPromptTemplate.from_messages([
     (
         "system",
         """
-You are a strict grounding verifier.
+You are a strict grounding and answer-completeness verifier.
 
-Check whether EVERY factual claim in the answer is explicitly
-supported by the retrieved context.
+You receive:
+1. the user's exact question;
+2. the retrieved context;
+3. the generated answer.
 
-Mark the answer UNSUPPORTED if any claim:
+Your job is NOT to rewrite or correct the answer.
 
-- uses the wrong number, date, unit, entity, or qualifier;
-- attaches a value to the wrong methodology or metric;
-- presents an example-specific value as a general rule;
-- makes a causal or comparative claim not stated in context;
-- changes the meaning of a mathematical equation;
-- changes an exponent, root, sign, subscript, operator, or equality;
-- cites a source that does not support the claim;
-- introduces outside knowledge, including in examples or parentheses.
+Evaluate two separate things:
 
-If the answer says the context lacks information but then supplies
-that missing information anyway, mark it unsupported.
+A. CORE ANSWER
+The core answer is the minimum information required to answer
+the user's actual question.
 
-Return:
-- is_supported
-- unsupported_claims: ONLY unsupported claims
-- reasoning: one short sentence
+Set core_answer_supported=true ONLY when that required answer is
+correct and explicitly supported by the retrieved context.
 
-If all claims are supported, unsupported_claims must be empty.
+For mathematical questions, the core answer fails if any required
+equation has a wrong or missing:
+- coefficient
+- variable
+- factor
+- sign
+- exponent
+- root
+- derivative order
+- subscript
+- operator
+- equality relationship
+
+Example:
+
+Context:
+iR = (L/R) diL/dt
+
+Answer:
+iR = (1/R) diL/dt
+
+core_answer_supported MUST be false because the required factor L
+is missing.
+
+B. OPTIONAL / EXTRA CLAIMS
+An answer may contain the correct core answer but also contain
+unnecessary unsupported material.
+
+If an extra claim is unsupported while the required core answer
+remains correct:
+
+- set is_supported=false;
+- keep core_answer_supported=true;
+- put the unsupported material in unsupported_claims.
+
+CRITICAL REDACTION RULE:
+
+Every item in unsupported_claims MUST be copied EXACTLY and
+VERBATIM from the generated answer.
+
+Do not paraphrase.
+Do not summarize.
+Do not correct the text.
+Return the smallest complete removable substring that can be
+deleted without changing the supported core answer.
+
+Include punctuation in the copied substring when appropriate.
+
+If the required/core answer itself is incorrect or unsupported,
+set core_answer_supported=false.
+
+Set is_supported=true ONLY when every factual claim in the answer
+is supported.
+
+When is_supported=true:
+- core_answer_supported must also be true;
+- unsupported_claims must be empty.
+
+Never generate a corrected answer.
 """
     ),
     (
         "human",
         """
+Question:
+{question}
+
 Retrieved context:
 {context}
 
-Answer:
+Generated answer:
 {generation}
 """
     )
@@ -282,8 +465,23 @@ def retrieve_node(state):
         f"Search query: {search_query}"
     )
     with measure_stage("retrieval_ms"):
-        docs = hybrid_rerank_retriever.invoke(
-            search_query
+        use_wide = (
+            state.get(
+                "rewrite_count",
+                0,
+            ) > 0
+        )
+
+        if use_wide:
+            print(
+                "🔎 Using WIDE fallback retrieval."
+            )
+
+        docs = retrieve_with_neighbor_context(
+            search_query,
+            page_radius=1,
+            max_docs=6 if use_wide else 4,
+            use_wide=use_wide,
         )
 
     retrieved_documents = []
@@ -292,6 +490,12 @@ def retrieve_node(state):
 
         retrieved_documents.append({
             "content": doc.page_content,
+
+            "retrieval_excerpt": doc.metadata.get(
+                "retrieval_excerpt",
+                doc.page_content,
+            ),
+
             "source": doc.metadata.get(
                 "source",
                 "unknown"
@@ -305,6 +509,10 @@ def retrieve_node(state):
                     "extraction_method",
                     "unknown"
                 ),
+            "chunk_index": doc.metadata.get(
+                "chunk_index",
+                -1,
+            ),
         })
     
     for i, doc in enumerate(
@@ -315,6 +523,7 @@ def retrieve_node(state):
             f"   [{i}] "
             f"{doc['source']} "
             f"| page {doc['page']} "
+            f"| chunk {doc.get('chunk_index', -1)} "
             f"| {doc['extraction_method']}"
         )
 
@@ -418,12 +627,19 @@ def generate_node(state):
 
 def verify_node(state):
 
-    print("--- ⚖️ NODE: GROUNDING VERIFICATION ---")
+    print(
+        "--- ⚖️ NODE: GROUNDING VERIFICATION ---"
+    )
 
     generation = state["generation"]
 
-    # Do not waste another LLM call verifying an abstention.
-    if generation_lacks_context(generation):
+    # --------------------------------------------------------
+    # Existing abstention path
+    # --------------------------------------------------------
+
+    if generation_lacks_context(
+        generation
+    ):
 
         print(
             "✅ Insufficient-context answer detected. "
@@ -439,23 +655,77 @@ def verify_node(state):
             "verification_feedback": None,
         }
 
-    context = format_context(
-        state["documents"]
+    # --------------------------------------------------------
+    # Citation-local verification
+    # --------------------------------------------------------
+
+    cited_indices = (
+        extract_cited_source_indices(
+            generation
+        )
     )
 
-    with measure_stage("verification_ms"):
+    if cited_indices:
+
+        print(
+            "🔎 Verifying only cited sources:",
+            sorted(cited_indices),
+        )
+
+        context = format_context(
+            state["documents"],
+            selected_indices=cited_indices,
+        )
+
+    else:
+
+        print(
+            "⚠️ No citations detected; "
+            "verifying against full context."
+        )
+
+        context = format_context(
+            state["documents"]
+        )
+
+    # --------------------------------------------------------
+    # Verification
+    # --------------------------------------------------------
+
+    with measure_stage(
+        "verification_ms"
+    ):
 
         result = verifier_chain.invoke(
             {
-                "context": context,
-                "generation": generation,
+                "question":
+                    state["question"],
+
+                "context":
+                    context,
+
+                "generation":
+                    generation,
             }
         )
 
     print(
-        f"Result: "
-        f"{'✅ SUPPORTED' if result.is_supported else '❌ UNSUPPORTED'}"
+        "Result:",
+        (
+            "✅ SUPPORTED"
+            if result.is_supported
+            else "❌ UNSUPPORTED"
+        ),
     )
+
+    print(
+        "Core answer supported:",
+        result.core_answer_supported,
+    )
+
+    # --------------------------------------------------------
+    # Fully supported
+    # --------------------------------------------------------
 
     if result.is_supported:
 
@@ -464,7 +734,7 @@ def verify_node(state):
         }
 
     print(
-        "Unsupported claims:",
+        "Unsupported spans:",
         result.unsupported_claims,
     )
 
@@ -473,31 +743,128 @@ def verify_node(state):
         result.reasoning,
     )
 
+    # --------------------------------------------------------
+    # Core answer itself is wrong -> FAIL CLOSED
+    # --------------------------------------------------------
+
+    if not result.core_answer_supported:
+
+        print(
+            "🛑 Core answer is unsupported. "
+            "Returning safe fallback."
+        )
+
+        return {
+            "generation": (
+                "I'm sorry, the retrieved context does not contain "
+                "enough verified information to safely answer "
+                "this question."
+            ),
+            "verification_feedback": None,
+        }
+
+    # --------------------------------------------------------
+    # Core answer is correct, optional material is bad.
+    # Delete only exact unsupported text.
+    # --------------------------------------------------------
+
+    cleaned_generation = (
+        redact_unsupported_claims(
+            generation,
+            result.unsupported_claims,
+        )
+    )
+
+    if not cleaned_generation:
+
+        print(
+            "🛑 Safe redaction could not be performed. "
+            "Returning fallback."
+        )
+
+        return {
+            "generation": (
+                "I'm sorry, the retrieved context does not contain "
+                "enough verified information to safely answer "
+                "this question."
+            ),
+            "verification_feedback": None,
+        }
+
     print(
-        "🛑 Returning safe fallback."
+        "✂️ Unsupported optional material removed "
+        "without regeneration."
     )
 
     return {
-        "generation": (
-            "I'm sorry, the retrieved context does not contain "
-            "enough verified information to safely answer "
-            "this question."
-        ),
-        "verification_feedback": None,
+        "generation":
+            cleaned_generation,
+
+        "verification_feedback":
+            None,
     }
 
-# ==========================================
-# 4. DEFINE ROUTING LOGIC
-# ==========================================
 def _doc_text(doc):
+    """
+    Return text from either our retrieved-document dict
+    or another document-like object.
+    """
+
     if isinstance(doc, dict):
         return doc.get(
             "content",
-            doc.get("page_content", "")
+            doc.get(
+                "page_content",
+                "",
+            ),
         )
 
-    return str(doc)
+    return getattr(
+        doc,
+        "page_content",
+        str(doc),
+    )
 
+def _grader_doc_text(
+    doc,
+    max_chars=1200,
+):
+    """
+    Use the child retrieval chunk for
+    sufficiency grading.
+
+    Fall back to parent content only when an
+    excerpt is unavailable.
+    """
+
+    if isinstance(doc, dict):
+
+        text = doc.get(
+            "retrieval_excerpt"
+        )
+
+        if not text:
+            text = _doc_text(doc)
+
+    else:
+
+        metadata = getattr(
+            doc,
+            "metadata",
+            {},
+        )
+
+        text = metadata.get(
+            "retrieval_excerpt"
+        )
+
+        if not text:
+            text = _doc_text(doc)
+
+    if len(text) <= max_chars:
+        return text
+
+    return text[:max_chars]
 
 def decide_to_generate(state):
     print(
@@ -511,7 +878,8 @@ def decide_to_generate(state):
         return "generate"
 
     context = "\n\n".join(
-        f"[DOCUMENT {index}]\n{_doc_text(doc)}"
+        f"[DOCUMENT {index}]\n"
+        f"{_grader_doc_text(doc)}"
         for index, doc in enumerate(
             state["documents"],
             start=1,
