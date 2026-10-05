@@ -12,26 +12,306 @@ from src.state import GradeDocuments, RewrittenQuery, CitationVerification
 from src.retrieval import (
     retrieve_with_neighbor_context,
 )
+
+GENERATION_CONTEXT_CHAR_BUDGET = 12000
+VERIFICATION_CONTEXT_CHAR_BUDGET = 8000
+
 # ==========================================
 # 0. Helper for formatting context
 # ==========================================
-def format_context(
-    documents,
-    selected_indices=None,
-):
+MONTH_NAMES = (
+    "january|february|march|april|may|june|"
+    "july|august|september|october|november|december"
+)
 
-    formatted_sections = []
+
+def _normalize_temporal_text(text: str) -> str:
+    """
+    Normalize simple temporal expressions so that
+    FY 26 == FY26 and July – December == July-December.
+    """
+
+    if not text:
+        return ""
+
+    text = text.lower()
+
+    text = (
+        text
+        .replace("–", "-")
+        .replace("—", "-")
+    )
+
+    text = re.sub(
+        r"\bfy\s+(\d{2})\b",
+        r"fy\1",
+        text,
+    )
+
+    text = re.sub(
+        r"\s*-\s*",
+        "-",
+        text,
+    )
+
+    return text
+
+
+def _extract_temporal_anchors(
+    question: str,
+):
+    """
+    Extract explicit fiscal-year and month-range
+    constraints from the question.
+
+    We activate filtering only when the question
+    contains BOTH a month range and fiscal-year
+    information.
+    """
+
+    text = _normalize_temporal_text(
+        question
+    )
+
+    month_ranges = re.findall(
+        rf"\b({MONTH_NAMES})-({MONTH_NAMES})\b",
+        text,
+    )
+
+    month_ranges = {
+        f"{start}-{end}"
+        for start, end in month_ranges
+    }
+
+    fiscal_years = set(
+        re.findall(
+            r"\bfy\d{2}\b",
+            text,
+        )
+    )
+
+    if (
+        not month_ranges
+        or not fiscal_years
+    ):
+        return None
+
+    return {
+        "month_ranges":
+            month_ranges,
+
+        "fiscal_years":
+            fiscal_years,
+    }
+
+def _temporal_qualifier_indices(
+    question,
+    documents,
+):
+    """
+    Identify retrieved pages that explicitly match
+    the temporal constraints in the question.
+
+    Matching pages plus their immediately adjacent
+    retrieved pages are allowed.
+
+    Returns None when temporal filtering should not
+    be applied.
+    """
+
+    anchors = _extract_temporal_anchors(
+        question
+    )
+
+    if not anchors:
+        return None
+
+    anchor_indices = []
 
     for index, doc in enumerate(
         documents,
         start=1,
     ):
 
+        searchable_text = (
+            doc.get("content", "")
+            + "\n"
+            + doc.get(
+                "retrieval_excerpt",
+                "",
+            )
+        )
+
+        normalized = (
+            _normalize_temporal_text(
+                searchable_text
+            )
+        )
+
+        range_match = any(
+            month_range in normalized
+            for month_range
+            in anchors["month_ranges"]
+        )
+
+        fy_match = all(
+            fiscal_year in normalized
+            for fiscal_year
+            in anchors["fiscal_years"]
+        )
+
+        if (
+            range_match
+            and fy_match
+        ):
+            anchor_indices.append(
+                index
+            )
+
+    # No strong exact match:
+    # preserve current behavior rather than
+    # guessing which pages are relevant.
+    if not anchor_indices:
+        return None
+
+    allowed_indices = set(
+        anchor_indices
+    )
+
+    # Preserve retrieved neighboring pages from
+    # the same document, because equations/tables
+    # or prose may continue across pages.
+    for anchor_index in anchor_indices:
+
+        anchor_doc = documents[
+            anchor_index - 1
+        ]
+
+        anchor_source = (
+            anchor_doc.get("source")
+        )
+
+        anchor_page = (
+            anchor_doc.get("page")
+        )
+
+        for index, doc in enumerate(
+            documents,
+            start=1,
+        ):
+
+            if (
+                doc.get("source")
+                != anchor_source
+            ):
+                continue
+
+            page = doc.get("page")
+
+            if (
+                isinstance(page, int)
+                and
+                isinstance(
+                    anchor_page,
+                    int,
+                )
+                and
+                abs(
+                    page - anchor_page
+                ) <= 1
+            ):
+                allowed_indices.add(
+                    index
+                )
+
+    return allowed_indices
+
+def format_context(
+    documents,
+    selected_indices=None,
+    max_total_chars=None,
+):
+    """
+    Format retrieved evidence for generation/verification.
+
+    If a total context budget is supplied, divide the budget
+    across all selected sources. Full layout-preserved parent
+    pages are used when they fit; otherwise fall back to the
+    smaller child retrieval excerpt.
+
+    This keeps every selected source represented instead of
+    dropping later sources when the context becomes large.
+    """
+
+    selected_documents = []
+
+    for index, doc in enumerate(
+        documents,
+        start=1,
+    ):
         if (
             selected_indices is not None
             and index not in selected_indices
         ):
             continue
+
+        selected_documents.append(
+            (index, doc)
+        )
+
+    if not selected_documents:
+        return ""
+
+    # --------------------------------------------------------
+    # Determine per-source content budget
+    # --------------------------------------------------------
+
+    per_doc_budget = None
+
+    if max_total_chars is not None:
+
+        per_doc_budget = max(
+            1000,
+            max_total_chars
+            // len(selected_documents),
+        )
+
+    formatted_sections = []
+
+    for index, doc in selected_documents:
+
+        content = doc["content"]
+        context_level = "parent_page"
+
+        # ----------------------------------------------------
+        # Parent page too large -> use retrieval child excerpt
+        # ----------------------------------------------------
+
+        if (
+            per_doc_budget is not None
+            and len(content) > per_doc_budget
+        ):
+
+            retrieval_excerpt = doc.get(
+                "retrieval_excerpt",
+                "",
+            )
+
+            if retrieval_excerpt:
+
+                content = retrieval_excerpt
+                context_level = "retrieval_excerpt"
+
+            # Last-resort deterministic clipping.
+            if len(content) > per_doc_budget:
+
+                content = content[
+                    :per_doc_budget
+                ]
+
+                context_level = (
+                    f"{context_level}_trimmed"
+                )
 
         formatted_sections.append(
             f"""
@@ -39,8 +319,9 @@ def format_context(
 Document: {doc["source"]}
 Page: {doc["page"]}
 Extraction: {doc["extraction_method"]}
+Context level: {context_level}
 
-{doc["content"]}
+{content}
 """.strip()
         )
 
@@ -623,7 +904,31 @@ def rewrite_node(state):
 
 def generate_node(state):
     print("--- 🤖 NODE: GENERATING ANSWER ---")
-    context = format_context(state["documents"])
+
+    temporal_indices = (
+        _temporal_qualifier_indices(
+            state["question"],
+            state["documents"],
+        )
+    )
+
+    if temporal_indices:
+
+        print(
+            "🗓️ Temporal qualifier filter:",
+            sorted(temporal_indices),
+        )
+    
+    context = format_context(
+        state["documents"],
+        max_total_chars=
+            GENERATION_CONTEXT_CHAR_BUDGET,
+    )
+
+    print(
+        f"📏 Generator context: "
+        f"{len(context):,} chars"
+    )
     
     feedback_msg = ""
 
@@ -709,6 +1014,8 @@ def verify_node(state):
         context = format_context(
             state["documents"],
             selected_indices=cited_indices,
+            max_total_chars=
+                VERIFICATION_CONTEXT_CHAR_BUDGET,
         )
 
     else:
@@ -719,13 +1026,20 @@ def verify_node(state):
         )
 
         context = format_context(
-            state["documents"]
+            state["documents"],
+            max_total_chars=
+                VERIFICATION_CONTEXT_CHAR_BUDGET,
         )
 
     # --------------------------------------------------------
     # Verification
     # --------------------------------------------------------
 
+    print(
+        f"📏 Verifier context: "
+        f"{len(context):,} chars"
+    )
+    
     with measure_stage(
         "verification_ms"
     ):

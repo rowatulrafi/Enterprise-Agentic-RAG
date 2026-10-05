@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 DATASET_PATH = (
     BASE_DIR
-    / "holdout20.json"
+    / "holdout2_locked.json"
 )
 
 RESULTS_DIR = BASE_DIR / "results"
@@ -63,31 +63,7 @@ dataset = full_dataset
 # ============================================================
 
 SELECTED_IDS = [
-    # Economics
-    "holdout_econ_001",
-    "holdout_econ_002",
-    "holdout_econ_003",
-    "holdout_econ_004",
-    "holdout_econ_005",
-    "holdout_econ_006",
-    "holdout_econ_007",
-
-    # RLC
-    "holdout_rlc_001",
-    "holdout_rlc_002",
-    "holdout_rlc_003",
-    "holdout_rlc_004",
-    "holdout_rlc_005",
-    "holdout_rlc_006",
-    "holdout_rlc_007",
-
-    # Nature
-    "holdout_nature_001",
-    "holdout_nature_002",
-    "holdout_nature_003",
-    "holdout_nature_004",
-    "holdout_nature_005",
-    "holdout_nature_006",
+    "holdout2_econ_004",
 ]
 
 dataset = [
@@ -98,7 +74,7 @@ dataset = [
 
 OUTPUT_PATH = (
     RESULTS_DIR
-    / "v2_dev20_full.csv"
+    / "holdout2_postfix_econ004_temporal_guard.csv"
 )
 
 # ============================================================
