@@ -19,212 +19,6 @@ VERIFICATION_CONTEXT_CHAR_BUDGET = 8000
 # ==========================================
 # 0. Helper for formatting context
 # ==========================================
-MONTH_NAMES = (
-    "january|february|march|april|may|june|"
-    "july|august|september|october|november|december"
-)
-
-
-def _normalize_temporal_text(text: str) -> str:
-    """
-    Normalize simple temporal expressions so that
-    FY 26 == FY26 and July – December == July-December.
-    """
-
-    if not text:
-        return ""
-
-    text = text.lower()
-
-    text = (
-        text
-        .replace("–", "-")
-        .replace("—", "-")
-    )
-
-    text = re.sub(
-        r"\bfy\s+(\d{2})\b",
-        r"fy\1",
-        text,
-    )
-
-    text = re.sub(
-        r"\s*-\s*",
-        "-",
-        text,
-    )
-
-    return text
-
-
-def _extract_temporal_anchors(
-    question: str,
-):
-    """
-    Extract explicit fiscal-year and month-range
-    constraints from the question.
-
-    We activate filtering only when the question
-    contains BOTH a month range and fiscal-year
-    information.
-    """
-
-    text = _normalize_temporal_text(
-        question
-    )
-
-    month_ranges = re.findall(
-        rf"\b({MONTH_NAMES})-({MONTH_NAMES})\b",
-        text,
-    )
-
-    month_ranges = {
-        f"{start}-{end}"
-        for start, end in month_ranges
-    }
-
-    fiscal_years = set(
-        re.findall(
-            r"\bfy\d{2}\b",
-            text,
-        )
-    )
-
-    if (
-        not month_ranges
-        or not fiscal_years
-    ):
-        return None
-
-    return {
-        "month_ranges":
-            month_ranges,
-
-        "fiscal_years":
-            fiscal_years,
-    }
-
-def _temporal_qualifier_indices(
-    question,
-    documents,
-):
-    """
-    Identify retrieved pages that explicitly match
-    the temporal constraints in the question.
-
-    Matching pages plus their immediately adjacent
-    retrieved pages are allowed.
-
-    Returns None when temporal filtering should not
-    be applied.
-    """
-
-    anchors = _extract_temporal_anchors(
-        question
-    )
-
-    if not anchors:
-        return None
-
-    anchor_indices = []
-
-    for index, doc in enumerate(
-        documents,
-        start=1,
-    ):
-
-        searchable_text = (
-            doc.get("content", "")
-            + "\n"
-            + doc.get(
-                "retrieval_excerpt",
-                "",
-            )
-        )
-
-        normalized = (
-            _normalize_temporal_text(
-                searchable_text
-            )
-        )
-
-        range_match = any(
-            month_range in normalized
-            for month_range
-            in anchors["month_ranges"]
-        )
-
-        fy_match = all(
-            fiscal_year in normalized
-            for fiscal_year
-            in anchors["fiscal_years"]
-        )
-
-        if (
-            range_match
-            and fy_match
-        ):
-            anchor_indices.append(
-                index
-            )
-
-    # No strong exact match:
-    # preserve current behavior rather than
-    # guessing which pages are relevant.
-    if not anchor_indices:
-        return None
-
-    allowed_indices = set(
-        anchor_indices
-    )
-
-    # Preserve retrieved neighboring pages from
-    # the same document, because equations/tables
-    # or prose may continue across pages.
-    for anchor_index in anchor_indices:
-
-        anchor_doc = documents[
-            anchor_index - 1
-        ]
-
-        anchor_source = (
-            anchor_doc.get("source")
-        )
-
-        anchor_page = (
-            anchor_doc.get("page")
-        )
-
-        for index, doc in enumerate(
-            documents,
-            start=1,
-        ):
-
-            if (
-                doc.get("source")
-                != anchor_source
-            ):
-                continue
-
-            page = doc.get("page")
-
-            if (
-                isinstance(page, int)
-                and
-                isinstance(
-                    anchor_page,
-                    int,
-                )
-                and
-                abs(
-                    page - anchor_page
-                ) <= 1
-            ):
-                allowed_indices.add(
-                    index
-                )
-
-    return allowed_indices
 
 def format_context(
     documents,
@@ -620,7 +414,7 @@ EXACT ANSWER EXTRACTION:
 - Preserve every coefficient, variable, factor, sign, exponent,
   derivative order, subscript, and operator exactly.
 
-{feedback}
+
 """
     ),
     (
@@ -904,25 +698,10 @@ def rewrite_node(state):
 
 def generate_node(state):
     print("--- 🤖 NODE: GENERATING ANSWER ---")
-
-    temporal_indices = (
-        _temporal_qualifier_indices(
-            state["question"],
-            state["documents"],
-        )
-    )
-
-    if temporal_indices:
-
-        print(
-            "🗓️ Temporal qualifier filter:",
-            sorted(temporal_indices),
-        )
-    
+   
     context = format_context(
         state["documents"],
-        max_total_chars=
-            GENERATION_CONTEXT_CHAR_BUDGET,
+        max_total_chars=GENERATION_CONTEXT_CHAR_BUDGET,
     )
 
     print(
@@ -930,36 +709,12 @@ def generate_node(state):
         f"{len(context):,} chars"
     )
     
-    feedback_msg = ""
-
-    if state.get("verification_feedback"):
-
-        print("⚠️ Applying feedback from verifier...")
-
-        feedback_msg = f"""
-    PREVIOUS DRAFT:
-    {state["generation"]}
-
-    VERIFIER FEEDBACK:
-    {state["verification_feedback"]}
-
-    Revise the previous draft rather than generating a completely
-    new answer.
-
-    Preserve all supported claims.
-
-    For mathematical equations:
-    - preserve the exact mathematical relationship in the source;
-    - do not drop exponents, roots, signs, subscripts, or operators;
-    - do not algebraically rearrange an equation unless necessary.
-    """
         
     with measure_stage("generation_ms"):
         generation = rag_chain.invoke(
             {
                 "context": context,
                 "question": state["question"],
-                "feedback": feedback_msg,
             }
         )
     return {"generation": generation}
@@ -991,7 +746,7 @@ def verify_node(state):
                 "enough verified information to safely answer "
                 "this question."
             ),
-            "verification_feedback": None,
+
         }
 
     # --------------------------------------------------------
@@ -1078,7 +833,7 @@ def verify_node(state):
     if result.is_supported:
 
         return {
-            "verification_feedback": None,
+    
         }
 
     print(
@@ -1108,7 +863,7 @@ def verify_node(state):
                 "enough verified information to safely answer "
                 "this question."
             ),
-            "verification_feedback": None,
+            
         }
 
     # --------------------------------------------------------
@@ -1136,7 +891,7 @@ def verify_node(state):
                 "enough verified information to safely answer "
                 "this question."
             ),
-            "verification_feedback": None,
+            
         }
 
     print(
@@ -1148,8 +903,6 @@ def verify_node(state):
         "generation":
             cleaned_generation,
 
-        "verification_feedback":
-            None,
     }
 
 def _doc_text(doc):

@@ -1,23 +1,27 @@
 from langgraph.graph import END, StateGraph
-from src.state import MasterRAGState
-from src.nodes import (
-    retrieve_node, rewrite_node, generate_node, verify_node,
-    decide_to_generate, decide_after_generation,
-)
 
-# 1. Initialize the State Machine
+from src.nodes import (
+    decide_after_generation,
+    decide_to_generate,
+    generate_node,
+    retrieve_node,
+    rewrite_node,
+    verify_node,
+)
+from src.state import MasterRAGState
+
+
 workflow = StateGraph(MasterRAGState)
 
-# 2. Add the computational nodes
 workflow.add_node("retrieve", retrieve_node)
 workflow.add_node("rewrite", rewrite_node)
 workflow.add_node("generate", generate_node)
 workflow.add_node("verify", verify_node)
 
-# 3. Map the Edges (The Logic Wires)
 workflow.set_entry_point("retrieve")
 
-# After retrieval, grade the documents to decide where to go
+# Retrieval sufficiency determines whether to answer
+# immediately or perform one query rewrite.
 workflow.add_conditional_edges(
     "retrieve",
     decide_to_generate,
@@ -27,10 +31,13 @@ workflow.add_conditional_edges(
     },
 )
 
-# If rewritten, go back to retrieve
-workflow.add_edge("rewrite", "retrieve")
+workflow.add_edge(
+    "rewrite",
+    "retrieve",
+)
 
-# After generation, always verify
+# A generator-level insufficient-context decision can trigger
+# the rewrite path; otherwise the answer is verified.
 workflow.add_conditional_edges(
     "generate",
     decide_after_generation,
@@ -40,11 +47,10 @@ workflow.add_conditional_edges(
     },
 )
 
-# After verification, decide if we can end or need to re-generate
+# Verification is the terminal safety gate.
 workflow.add_edge(
     "verify",
-    END
+    END,
 )
 
-# 4. Compile the application
 app = workflow.compile()

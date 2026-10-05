@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from typing_extensions import TypedDict
 from pydantic import BaseModel, Field
 
@@ -11,6 +11,7 @@ class RetrievedDocument(TypedDict):
     source: str
     page: int
     extraction_method: str
+    retrieval_excerpt: str
 
 class DocumentValidation(BaseModel):
     """Evaluates extracted OCR text for coherence and structure."""
@@ -26,18 +27,19 @@ class MasterRAGState(TypedDict):
     search_query: str
     documents: List[RetrievedDocument]
     generation: str
-    verification_feedback: Optional[str]
-
     rewrite_count: int
-    verification_retries: int
     
 # ==========================================
 # 3. STRUCTURED LLM OUTPUTS FOR GRAPH
 # ==========================================
 class GradeDocuments(BaseModel):
-    """Binary score for relevance check on retrieved documents."""
-    binary_score: str = Field(description="Documents are relevant to the question, 'yes' or 'no'")
-
+    """Binary assessment of whether retrieved evidence is sufficient to answer."""
+    binary_score: str = Field(
+        description=(
+            "Whether the retrieved evidence is sufficient to answer "
+            "the question: 'yes' or 'no'."
+        )
+    )
 class RewrittenQuery(BaseModel):
     """The rewritten query for vector search."""
     query: str = Field(description="The optimized search query string ONLY.")
