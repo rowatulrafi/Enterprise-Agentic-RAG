@@ -400,6 +400,34 @@ iR = (1/R) diL/dt
 core_answer_supported MUST be false because the required factor L
 is missing.
 
+LIMITING-RESPONSE COMPLETENESS:
+
+When the question asks what a response approaches, becomes,
+reduces to, or equals under a limiting condition, and the context
+provides an explicit resulting expression, the complete explicit
+expression is the required core answer.
+
+Do NOT accept only one term, component, average value,
+steady-state value, DC component, or qualitative interpretation
+unless the question explicitly asks for that quantity.
+
+Example:
+
+Context:
+As R approaches infinity, the solution reduces to
+
+iL(t) = Is - Is cos(omega_0 t)
+
+Question:
+What does the current response approach as R becomes very large?
+
+Answer:
+iL = Is
+
+This MUST be marked core_answer_supported=false because the
+explicit limiting response contains the additional
+-Is cos(omega_0 t) term.
+
 B. OPTIONAL / EXTRA CLAIMS
 An answer may contain the correct core answer but also contain
 unnecessary unsupported material.
