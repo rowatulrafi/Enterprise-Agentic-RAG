@@ -1,0 +1,339 @@
+[
+  {
+    "id": "holdout2_econ_001",
+    "category": "economics",
+    "difficulty": "hard",
+    "question": "During July-December of FY26, how much tax revenue did the NBR collect, what was the year-on-year growth rate, and by how much did it miss its strategic target in both amount and percentage terms?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      16
+    ],
+    "reference_answer": "The NBR collected Tk 185,229 crore, up 14.19% year-on-year. It missed the strategic target of Tk 231,205.37 crore by Tk 45,976.37 crore, or 19.89%.",
+    "must_include": [
+      "Tk 185,229 crore",
+      "14.19%",
+      "Tk 45,976.37 crore",
+      "19.89%"
+    ]
+  },
+  {
+    "id": "holdout2_econ_002",
+    "category": "economics",
+    "difficulty": "medium",
+    "question": "What was the ADP implementation rate in July-December of FY26, how did it compare with the same period of FY25, and what historical characterization did the report give it?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      17
+    ],
+    "reference_answer": "ADP implementation was 17.54% in July-December of FY26, compared with 17.97% in July-December of FY25. The report described the FY26 rate as a 20-year low.",
+    "must_include": [
+      "17.54%",
+      "17.97%",
+      "20-year low"
+    ]
+  },
+  {
+    "id": "holdout2_econ_003",
+    "category": "economics",
+    "difficulty": "medium",
+    "question": "How did agricultural credit and non-farm rural credit disbursement and recovery change in July-December of FY26 compared with the same period of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      15,
+      16
+    ],
+    "reference_answer": "Disbursement rose 29.21% to Tk 21,008.16 crore from Tk 16,259.11 crore, while recovery rose 13.90% to Tk 21,774.42 crore from Tk 19,117.26 crore.",
+    "must_include": [
+      "Tk 21,008.16 crore",
+      "29.21%",
+      "Tk 21,774.42 crore",
+      "13.90%"
+    ]
+  },
+  {
+    "id": "holdout2_econ_004",
+    "category": "economics",
+    "difficulty": "hard",
+    "question": "What happened to Bangladesh's merchandise exports in July-December of FY26 compared with July-December of FY25, and what share of total export earnings came from knitwear and woven garments combined?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      18
+    ],
+    "reference_answer": "Exports declined 0.54% to US$24.40 billion from US$24.53 billion. Knitwear and woven garments together accounted for 80.62% of total export earnings.",
+    "must_include": [
+      "0.54%",
+      "US$24.40 billion",
+      "US$24.53 billion",
+      "80.62%"
+    ]
+  },
+  {
+    "id": "holdout2_econ_005",
+    "category": "economics",
+    "difficulty": "hard",
+    "question": "How did the total value of imports change in July-November of FY26, and how did November 2025 import payments compare year-on-year with November of the previous fiscal year?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      19
+    ],
+    "reference_answer": "Total imports grew 5.16% to US$29.13 billion from US$27.70 billion. November 2025 import payments rose 7.83% year-on-year to US$5.80 billion from US$5.38 billion.",
+    "must_include": [
+      "5.16%",
+      "US$29.13 billion",
+      "US$27.70 billion",
+      "7.83%",
+      "US$5.80 billion",
+      "US$5.38 billion"
+    ]
+  },
+  {
+    "id": "holdout2_econ_006",
+    "category": "economics",
+    "difficulty": "medium",
+    "question": "What happened to net foreign direct investment inflows in July-November of FY26 compared with the same period of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      21
+    ],
+    "reference_answer": "Net FDI inflows increased 59.95% year-on-year to US$651 million from US$407 million.",
+    "must_include": [
+      "59.95%",
+      "US$651 million",
+      "US$407 million"
+    ]
+  },
+  {
+    "id": "holdout2_econ_007",
+    "category": "economics",
+    "difficulty": "hard",
+    "question": "For July-November of FY26, how did the current account balance, overall balance of payments, and financial account compare with the corresponding period of FY25?",
+    "expected_source": "October-December-25-3.json",
+    "expected_pages": [
+      21,
+      22
+    ],
+    "reference_answer": "The current account deficit widened to US$696 million from US$568 million. The overall balance moved to a US$769 million surplus from a US$2.538 billion deficit, while the financial account moved to a US$1.233 billion surplus from a US$1.010 billion deficit.",
+    "must_include": [
+      "current account deficit",
+      "US$696 million",
+      "US$568 million",
+      "US$769 million surplus",
+      "US$2.538 billion deficit",
+      "US$1.233 billion surplus",
+      "US$1.010 billion deficit"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_001",
+    "category": "rlc",
+    "difficulty": "medium",
+    "question": "For the series RLC circuit, how are the damping rate alpha and natural frequency omega_0 defined?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      2
+    ],
+    "reference_answer": "For the series RLC circuit, alpha = R/(2L) and omega_0 = 1/sqrt(LC).",
+    "must_include": [
+      "alpha = R/(2L)",
+      "omega_0 = 1/sqrt(LC)"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_002",
+    "category": "rlc",
+    "difficulty": "medium",
+    "question": "For the series RLC circuit, what conditions on alpha relative to omega_0 correspond to critically damped, overdamped, and underdamped responses?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      3
+    ],
+    "reference_answer": "Critically damped: alpha = omega_0. Overdamped: alpha > omega_0. Underdamped: alpha < omega_0.",
+    "must_include": [
+      "alpha = omega_0",
+      "alpha > omega_0",
+      "alpha < omega_0"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_003",
+    "category": "rlc",
+    "difficulty": "medium",
+    "question": "In the series RLC example with L = 47 mH and C = 47 nF, which resistor values correspond to the underdamped, critically damped, and overdamped cases?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      4
+    ],
+    "reference_answer": "R = 500 ohm is underdamped, R = 2000 ohm is critically damped, and R = 4000 ohm is overdamped.",
+    "must_include": [
+      "500",
+      "underdamped",
+      "2000",
+      "critically damped",
+      "4000",
+      "overdamped"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_004",
+    "category": "rlc",
+    "difficulty": "hard",
+    "question": "In the lossless LC limit of the series RLC circuit as R approaches zero, what are the characteristic roots and the general form of the capacitor-voltage response?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      5
+    ],
+    "reference_answer": "The characteristic roots are s1 = +j omega_0 and s2 = -j omega_0. The capacitor voltage can be written as v_c(t) = B1 cos(omega_0 t) + B2 sin(omega_0 t).",
+    "must_include": [
+      "+j omega_0",
+      "-j omega_0",
+      "B1 cos(omega_0 t)",
+      "B2 sin(omega_0 t)"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_005",
+    "category": "rlc",
+    "difficulty": "hard",
+    "question": "For the lossless LC circuit with v_c(0) = V0 and zero initial current, what are v_c(t) and v_L(t), and what phase relationship does the text note between them?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      6
+    ],
+    "reference_answer": "v_c(t) = V0 cos(omega_0 t) and v_L(t) = -V0 cos(omega_0 t). The two voltages are 180 degrees out of phase.",
+    "must_include": [
+      "v_c(t) = V0 cos(omega_0 t)",
+      "v_L(t) = -V0 cos(omega_0 t)",
+      "180"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_006",
+    "category": "rlc",
+    "difficulty": "medium",
+    "question": "For the parallel RLC circuit driven by the DC current source, what initial conditions are established at t = 0 before solving for the response?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      9
+    ],
+    "reference_answer": "Because the source current was zero before t = 0, the initial conditions are i_L(0) = 0 and v(0) = 0.",
+    "must_include": [
+      "i_L(0) = 0",
+      "v(0) = 0"
+    ]
+  },
+  {
+    "id": "holdout2_rlc_007",
+    "category": "rlc",
+    "difficulty": "medium",
+    "question": "For the parallel RLC circuit, how are the resonant frequency omega_0 and damping rate alpha defined?",
+    "expected_source": "RLC.json",
+    "expected_pages": [
+      11
+    ],
+    "reference_answer": "For the parallel RLC circuit, omega_0 = 1/sqrt(LC) and alpha = 1/(2RC).",
+    "must_include": [
+      "omega_0 = 1/sqrt(LC)",
+      "alpha = 1/(2RC)"
+    ]
+  },
+  {
+    "id": "holdout2_nature_001",
+    "category": "nature",
+    "difficulty": "medium",
+    "question": "Among 18 Western countries discussed in the handbook, where did the United Kingdom rank for nature connection?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      7
+    ],
+    "reference_answer": "The United Kingdom ranked 16th out of 18 Western countries for nature connection.",
+    "must_include": [
+      "16th",
+      "18"
+    ]
+  },
+  {
+    "id": "holdout2_nature_002",
+    "category": "nature",
+    "difficulty": "medium",
+    "question": "During the first coronavirus lockdown, what did the handbook say explained higher wellbeing better: increased visits to nature or increased noticing of nature?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      7
+    ],
+    "reference_answer": "Increases in noticing nature explained higher levels of wellbeing better than people's increased visits to nature.",
+    "must_include": [
+      "noticing nature",
+      "better",
+      "increased visits"
+    ]
+  },
+  {
+    "id": "holdout2_nature_003",
+    "category": "nature",
+    "difficulty": "hard",
+    "question": "According to the handbook, how does nature connection compare with environmental knowledge in encouraging actions that help the environment and wildlife?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      8
+    ],
+    "reference_answer": "Nature connection is described as much more important than environmental knowledge for actions that help the environment and wildlife. Knowledge and environmental education alone do not lead to nature connection; how people interact with and feel about nature matters more.",
+    "must_include": [
+      "nature connection",
+      "more important than environmental knowledge",
+      "knowledge and environmental education alone do not lead to nature connection"
+    ]
+  },
+  {
+    "id": "holdout2_nature_004",
+    "category": "nature",
+    "difficulty": "medium",
+    "question": "What is the 'three good things in nature' activity described in the handbook, and what benefits does it report?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      16
+    ],
+    "reference_answer": "People are asked to notice three good things in nature every day for a week. The activity activates the pathways to nature connection and produces lasting psychological benefits and increased nature connection.",
+    "must_include": [
+      "three good things in nature",
+      "every day for a week",
+      "lasting psychological benefits",
+      "increased nature connection"
+    ]
+  },
+  {
+    "id": "holdout2_nature_005",
+    "category": "nature",
+    "difficulty": "hard",
+    "question": "What outcomes were reported from the RSPB Nature Prescriptions pilot regarding prescribers' willingness to continue, patients' awareness of nature, and patients' intention to keep using the prescription?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      28,
+      29
+    ],
+    "reference_answer": "91% of prescribers said they would continue to prescribe it. Over half of surveyed patients reported increased awareness of nature, and 87% said they would continue to use their nature prescription for wellbeing.",
+    "must_include": [
+      "91%",
+      "over half",
+      "increased awareness of nature",
+      "87%"
+    ]
+  },
+  {
+    "id": "holdout2_nature_006",
+    "category": "nature",
+    "difficulty": "medium",
+    "question": "How did Glimpse's 'Story Bench' use the meaning pathway to deepen people's connection to a piece of land?",
+    "expected_source": "the-nature-connection-handbook.json",
+    "expected_pages": [
+      30
+    ],
+    "reference_answer": "The Story Bench invited people to share stories about a piece of land and then carved images from those stories onto a bench, using the meaning pathway to deepen connection to the land.",
+    "must_include": [
+      "share stories",
+      "piece of land",
+      "carving",
+      "bench",
+      "meaning pathway"
+    ]
+  }
+]
