@@ -5,3 +5,9 @@ data/human_review_queue/*.txt
 __pycache__/
 *.pyc
 .venv/
+# Generated retrieval artifacts
+data/bm25_corpus.json
+data/page_context.json
+
+# Local source documents
+data/raw_pdfs/*.pdf

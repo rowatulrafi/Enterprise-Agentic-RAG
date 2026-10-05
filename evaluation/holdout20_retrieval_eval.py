@@ -7,7 +7,7 @@ from src.retrieval import RETRIEVERS
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DATASET_PATH = BASE_DIR / "dataset.json"
+DATASET_PATH = BASE_DIR / "holdout20.json"
 
 RESULTS_DIR = BASE_DIR / "results"
 RESULTS_DIR.mkdir(exist_ok=True)
